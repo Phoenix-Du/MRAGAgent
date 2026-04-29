@@ -1,0 +1,84 @@
+services:
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mmrag-orchestrator
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: >
+      python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rasa-parse:
+        condition: service_started
+      raganything-bridge:
+        condition: service_started
+      image-pipeline:
+        condition: service_started
+
+  image-pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mmrag-image-pipeline
+    env_file:
+      - .env
+    ports:
+      - "9010:9010"
+    command: >
+      python -m uvicorn app.integrations.image_pipeline_bridge:app --host 0.0.0.0 --port 9010
+
+  rasa-parse:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mmrag-rasa-parse
+    env_file:
+      - .env
+    ports:
+      - "5005:5005"
+    command: >
+      python -m uvicorn app.integrations.rasa_parse_bridge:app --host 0.0.0.0 --port 5005
+
+  raganything-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mmrag-raganything-bridge
+    env_file:
+      - .env
+    ports:
+      - "9002:9002"
+    command: >
+      python -m uvicorn app.integrations.raganything_bridge:app --host 0.0.0.0 --port 9002
+
+  redis:
+    image: redis:7-alpine
+    container_name: mmrag-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql:
+    image: mysql:8.0
+    container_name: mmrag-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: change_me
+      MYSQL_DATABASE: multimodal_rag
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pchange_me"]
+      interval: 10s
+      timeout: 5s
+      retries: 10

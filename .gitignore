@@ -1,0 +1,18 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+*.log
+
+# Runtime/generated data
+/tmp/
+/raganything_storage/
+/rasa_project/models/
+
+# Local model weights can be restored from model registries or local setup scripts.
+/models/
+/third_party/

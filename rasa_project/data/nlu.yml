@@ -1,0 +1,64 @@
+version: "3.1"
+
+nlu:
+  - intent: image_search
+    examples: |
+      - 我想要[几张](image_count)[晚上](time_of_day)的[黄鹤楼](landmark)照片
+      - 给我[3](image_count)张[夜景](time_of_day)的[黄鹤楼](landmark)图
+      - 帮我找[5](image_count)张[傍晚](time_of_day)的[外滩](landmark)图片
+      - 来几张[白天](time_of_day)的[故宫](landmark)照片
+      - 找[武汉长江大桥](landmark)的[夜晚](time_of_day)图片
+      - 我想看[西湖](landmark)的[白天](time_of_day)图
+      - 搜图：[东方明珠](landmark) [晚上](time_of_day)
+      - 给我一些[夜间](time_of_day)城市地标照片
+      - 帮我搜[几张](image_count)[黄鹤楼](landmark)照片
+      - 我想要[10](image_count)张[北京天坛](landmark)的图片
+      - 给我[两张](image_count)[夜晚](time_of_day)的[故宫](landmark)照片
+      - 来[5张](image_count)[晚上](time_of_day)[黄鹤楼](landmark)的图
+      - 帮我找[几张](image_count)[夜景](time_of_day)[东方明珠](landmark)照片
+
+  - intent: general_qa
+    examples: |
+      - 总结这个网页的核心观点
+      - 这篇文章主要讲了什么
+      - 帮我回答这个问题
+      - 给我一个简短结论
+      - 请解释一下这段内容
+      - 这个新闻的重点是什么
+      - 对比一下这两个方案
+      - 帮我做个通用问答
+
+  - synonym: night
+    examples: |
+      - 夜景
+      - 晚上
+      - 夜晚
+      - 夜间
+      - 傍晚
+
+  - lookup: landmark
+    examples: |
+      - 黄鹤楼
+      - 故宫
+      - 天坛
+      - 东方明珠
+      - 外滩
+      - 西湖
+      - 武汉长江大桥
+
+  - regex: image_count
+    examples: |
+      - \d{1,2}张?
+      - 几张
+      - 两张
+      - 三张
+      - 五张
+
+  - regex: time_of_day
+    examples: |
+      - 晚上
+      - 夜晚
+      - 夜间
+      - 夜景
+      - 傍晚
+      - 白天

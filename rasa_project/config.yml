@@ -1,0 +1,23 @@
+recipe: default.v1
+language: zh
+
+pipeline:
+- name: JiebaTokenizer
+- name: RegexFeaturizer
+- name: LexicalSyntacticFeaturizer
+- name: CountVectorsFeaturizer
+- name: CountVectorsFeaturizer
+  analyzer: char_wb
+  min_ngram: 1
+  max_ngram: 4
+- name: DIETClassifier
+  epochs: 100
+  entity_recognition: true
+- name: EntitySynonymMapper
+- name: FallbackClassifier
+  threshold: 0.45
+  ambiguity_threshold: 0.1
+
+policies:
+- name: RulePolicy
+assistant_id: 20260429-014439-silly-cabana

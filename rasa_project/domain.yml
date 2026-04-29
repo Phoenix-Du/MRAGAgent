@@ -1,0 +1,31 @@
+version: "3.1"
+
+intents:
+  - image_search
+  - general_qa
+
+entities:
+  - landmark
+  - time_of_day
+  - image_count
+
+slots:
+  landmark:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: landmark
+  time_of_day:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: time_of_day
+  image_count:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: image_count
+
+responses:
+  utter_ok:
+    - text: "ok"

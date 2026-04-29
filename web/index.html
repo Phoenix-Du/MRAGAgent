@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multimodal RAG</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <span class="logo-dot" aria-hidden="true"></span>
+          <span class="brand-name">RAG Agent</span>
+        </div>
+        <button type="button" class="btn-new-chat" id="btnNewChat">新对话</button>
+        <div class="sidebar-meta">
+          <span class="meta-label">会话 ID</span>
+          <code class="meta-uid" id="uidDisplay"></code>
+        </div>
+        <p class="sidebar-hint">与后端 <code>/v1/chat/query</code> 直连，同一端口无需跨域。</p>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <h1 class="topbar-title">对话</h1>
+          <div class="topbar-actions">
+            <label class="intent-wrap">
+              <span class="sr-only">意图</span>
+              <select id="intentSelect" class="intent-select" aria-label="意图">
+                <option value="">自动识别</option>
+                <option value="general_qa">通用问答</option>
+                <option value="image_search">文搜图</option>
+              </select>
+            </label>
+          </div>
+        </header>
+        <div class="thread" id="thread" role="log" aria-live="polite"></div>
+        <div class="composer-wrap">
+          <div class="composer-advanced">
+            <input
+              type="url"
+              id="urlInput"
+              class="url-input"
+              placeholder="可选：直接分析的网页 URL"
+              autocomplete="off"
+            />
+          </div>
+          <form class="composer" id="chatForm">
+            <textarea
+              id="queryInput"
+              class="composer-input"
+              rows="1"
+              placeholder="发送消息…"
+              required
+              maxlength="8000"
+            ></textarea>
+            <button type="submit" class="btn-send" id="btnSend" aria-label="发送">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M2 21L23 12L2 3v7l15 2-15 2v7z" fill="currentColor" />
+              </svg>
+            </button>
+          </form>
+          <p class="composer-disclaimer">回答由后端编排生成，可能包含检索与多模态结果。</p>
+        </div>
+      </main>
+    </div>
+    <script src="/static/app.js" type="module"></script>
+  </body>
+</html>
