@@ -7,6 +7,7 @@ class AppSettings(BaseSettings):
     app_name: str = "Multimodal RAG Agent"
     app_version: str = "0.2.0"
     log_level: str = "INFO"
+    cors_allow_origins: str = "*"
 
     # External connectors (replace with real endpoints)
     crawl4ai_endpoint: str | None = None
@@ -21,6 +22,8 @@ class AppSettings(BaseSettings):
     image_pipeline_endpoint: str | None = "http://127.0.0.1:9010/search-rank"
     web_search_candidates_n: int = 12
     web_url_select_m: int = 5
+    web_crawl_concurrency: int = 3
+    image_proxy_max_redirects: int = 5
 
     request_timeout_seconds: int = 30
     image_pipeline_timeout_seconds: int = 120
@@ -32,6 +35,8 @@ class AppSettings(BaseSettings):
     memory_max_turns: int = 10
     image_search_ingest_enabled: bool = False
     general_qa_body_rerank_enabled: bool = True
+    allow_placeholder_fallback: bool = True
+    local_rag_store_max_docs: int = 1000
 
     redis_url: str | None = None
     redis_prefix: str = "mmrag"
@@ -44,4 +49,3 @@ class AppSettings(BaseSettings):
 
 
 settings = AppSettings()
-

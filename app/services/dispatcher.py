@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import asyncio
 from hashlib import md5
 
 from app.core.runtime_flags import add_runtime_flag
 from app.core.settings import settings
+from app.core.url_safety import is_safe_public_http_url
 from app.models.schemas import ModalElement, QueryRequest, SourceDoc
 from app.services.connectors import BGERerankClient, CrawlClient, ImagePipelineClient, SearchClient
 from app.services.query_optimizer import optimize_web_query
@@ -47,14 +49,19 @@ class TaskDispatcher:
         selected_hits = await self.bge_rerank_client.rerank(optimized_web_query, search_hits, top_k=m_selected)
 
         selected_urls: list[str] = []
+        seen_urls: set[str] = set()
         for hit in selected_hits:
             url = str((hit.metadata or {}).get("url", "")).strip()
+            if not url or url in seen_urls:
+                continue
+            if not is_safe_public_http_url(url):
+                add_runtime_flag("unsafe_crawl_url_skipped")
+                continue
             if url:
+                seen_urls.add(url)
                 selected_urls.append(url)
 
-        crawled: list[SourceDoc] = []
-        for url in selected_urls:
-            crawled.append(await self.crawl_client.crawl(url))
+        crawled = await self._crawl_urls(selected_urls)
 
         if settings.general_qa_body_rerank_enabled and len(crawled) > 1:
             reranked_body = await self.bge_rerank_client.rerank(
@@ -82,3 +89,15 @@ class TaskDispatcher:
             metadata={"source": "image_pipeline", "image_search_query": image_query},
         )
         return [doc], images
+
+    async def _crawl_urls(self, urls: list[str]) -> list[SourceDoc]:
+        if not urls:
+            return []
+        concurrency = max(1, min(settings.web_crawl_concurrency, len(urls)))
+        semaphore = asyncio.Semaphore(concurrency)
+
+        async def _crawl_one(url: str) -> SourceDoc:
+            async with semaphore:
+                return await self.crawl_client.crawl(url)
+
+        return list(await asyncio.gather(*(_crawl_one(url) for url in urls)))

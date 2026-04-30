@@ -3,7 +3,8 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from app.core.url_safety import is_safe_public_http_url
+from pydantic import BaseModel, Field, field_validator
 
 
 IntentType = Literal["image_search", "general_qa"]
@@ -26,23 +27,32 @@ class SourceDoc(BaseModel):
 
 
 class QueryRequest(BaseModel):
-    uid: str
+    uid: str = Field(min_length=1, max_length=128)
     intent: IntentType | None = None
-    query: str
+    query: str = Field(min_length=1, max_length=4000)
     image_search_query: str | None = None
     original_query: str | None = None
-    url: str | None = None
+    url: str | None = Field(default=None, max_length=2048)
     source_docs: list[SourceDoc] = Field(default_factory=list)
     images: list[ModalElement] = Field(default_factory=list)
     image_constraints: "ImageSearchConstraints | None" = None
     general_constraints: "GeneralQueryConstraints | None" = None
     use_rasa_intent: bool = True
-    intent_confidence_threshold: float = 0.6
+    intent_confidence_threshold: float = Field(default=0.6, ge=0.0, le=1.0)
     device_info: str | None = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    max_images: int = 5
-    max_web_docs: int = 5
-    max_web_candidates: int | None = None
+    max_images: int = Field(default=5, ge=1, le=12)
+    max_web_docs: int = Field(default=5, ge=1, le=10)
+    max_web_candidates: int | None = Field(default=None, ge=1, le=50)
+
+    @field_validator("url")
+    @classmethod
+    def validate_http_url(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        if not is_safe_public_http_url(value):
+            raise ValueError("url must be a public http or https URL")
+        return value
 
 
 class EvidenceItem(BaseModel):

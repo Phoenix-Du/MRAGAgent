@@ -20,6 +20,7 @@ class BridgeSettings(BaseSettings):
     qwen_vlm_model: str = "qwen3.5-omni-plus-2026-03-15"
     request_timeout_seconds: int = 30
     parser_read_timeout_seconds: int = 120
+    parser_cache_max_entries: int = 256
 
     # RAGAnything bridge
     raganything_crawl_hybrid: bool = True

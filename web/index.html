@@ -24,7 +24,7 @@
           <span class="meta-label">会话 ID</span>
           <code class="meta-uid" id="uidDisplay"></code>
         </div>
-        <p class="sidebar-hint">与后端 <code>/v1/chat/query</code> 直连，同一端口无需跨域。</p>
+        <p class="sidebar-hint">与后端 <code>/v1/chat/query</code> 直连，同端口运行时无需跨域。</p>
       </aside>
       <main class="main">
         <header class="topbar">
@@ -56,9 +56,9 @@
               id="queryInput"
               class="composer-input"
               rows="1"
-              placeholder="发送消息…"
+              placeholder="发送消息"
               required
-              maxlength="8000"
+              maxlength="4000"
             ></textarea>
             <button type="submit" class="btn-send" id="btnSend" aria-label="发送">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">

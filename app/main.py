@@ -19,6 +19,13 @@ logging.basicConfig(
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
 
+def _cors_origins() -> list[str]:
+    raw = (settings.cors_allow_origins or "*").strip()
+    if raw == "*":
+        return ["*"]
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     yield
@@ -28,7 +35,7 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(title=settings.app_name, version=settings.app_version, lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins(),
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

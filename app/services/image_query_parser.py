@@ -17,6 +17,12 @@ from app.models.schemas import (
     ObjectRelationConstraint,
     SpatialRelationConstraint,
 )
+from app.services.llm_json_client import (
+    extract_json_obj as _shared_extract_json_obj,
+    llm_env as _shared_llm_env,
+    post_llm_json as _shared_post_llm_json,
+)
+from app.services.parser_cache import ParserCache
 
 
 logger = logging.getLogger(__name__)
@@ -53,8 +59,48 @@ _STATE_WORDS = ("大", "小", "高", "低", "长", "短", "新", "旧", "干", "
 
 _IMAGE_PARSE_CACHE_TTL_SECONDS = 180
 _GENERAL_PARSE_CACHE_TTL_SECONDS = 180
-_image_parse_cache: dict[str, tuple[float, ImageSearchConstraints]] = {}
-_general_parse_cache: dict[str, tuple[float, GeneralQueryConstraints]] = {}
+_image_parse_cache: ParserCache[ImageSearchConstraints] = ParserCache(
+    ttl_seconds=_IMAGE_PARSE_CACHE_TTL_SECONDS,
+    max_entries=bridge_settings.parser_cache_max_entries,
+)
+_general_parse_cache: ParserCache[GeneralQueryConstraints] = ParserCache(
+    ttl_seconds=_GENERAL_PARSE_CACHE_TTL_SECONDS,
+    max_entries=bridge_settings.parser_cache_max_entries,
+)
+
+_FILLERS.update(
+    {
+        "给我",
+        "来几张",
+        "找几张",
+        "搜几张",
+        "发几张",
+        "看几张",
+        "帮我",
+        "我想要",
+        "我想",
+        "几张",
+        "图片",
+        "照片",
+        "图",
+    }
+)
+_SPATIAL_KEYWORDS.update(
+    {
+        "左边": "left_right",
+        "左侧": "left_right",
+        "右边": "right_left",
+        "右侧": "right_left",
+        "前面": "front_back",
+        "后面": "back_front",
+        "上面": "above_below",
+        "下面": "below_above",
+        "旁边": "next_to",
+        "中间": "next_to",
+    }
+)
+_COLOR_WORDS = _COLOR_WORDS + ("红", "黄", "蓝", "白", "黑", "灰", "金", "银", "粉", "紫", "绿", "棕", "橙")
+_STATE_WORDS = _STATE_WORDS + ("大", "小", "高", "低", "长", "短", "新", "旧", "宽", "瘦", "胖")
 
 
 async def _post_llm_json(
@@ -64,6 +110,7 @@ async def _post_llm_json(
     payload: dict[str, Any],
     retries: int = 2,
 ) -> dict[str, Any] | None:
+    return await _shared_post_llm_json(base=base, api_key=api_key, payload=payload, retries=retries)
     timeout = httpx.Timeout(
         connect=float(bridge_settings.request_timeout_seconds),
         read=float(bridge_settings.parser_read_timeout_seconds),
@@ -97,6 +144,7 @@ async def _post_llm_json(
 
 
 def _llm_env() -> tuple[str, str, str]:
+    return _shared_llm_env()
     api_key = (bridge_settings.qwen_api_key or "").strip() or (
         bridge_settings.openai_api_key or ""
     ).strip()
@@ -110,6 +158,7 @@ def _llm_env() -> tuple[str, str, str]:
 
 
 def _extract_json_obj(text: str) -> dict[str, Any] | None:
+    return _shared_extract_json_obj(text)
     raw = text.strip()
     raw = re.sub(r"^```json\s*|^```\s*|```$", "", raw, flags=re.IGNORECASE | re.MULTILINE).strip()
     m = re.search(r"\{[\s\S]*\}", raw)
@@ -125,12 +174,32 @@ def _extract_json_obj(text: str) -> dict[str, Any] | None:
 
 def _clean_subject(text: str) -> str:
     value = text.strip()
-    value = re.sub(r"^(一只|一条|一位|一个|一名|一头|只|条|位|个)", "", value)
+    value = re.sub(r"^(一只|一条|一个|一位|一名|一头|只|条|个|位|名|头)", "", value)
     value = re.sub(r"(照片|图片|图|的|是)+$", "", value)
     return value.strip(" ，,。.；;:")
 
 
 def _parse_count_from_text(text: str) -> int | None:
+    m_real = re.search(r"(\d{1,2})\s*(张|个|幅|份)?", text)
+    if m_real:
+        return int(m_real.group(1))
+    real_mapping = {
+        "一": 1,
+        "二": 2,
+        "两": 2,
+        "三": 3,
+        "四": 4,
+        "五": 5,
+        "六": 6,
+        "七": 7,
+        "八": 8,
+        "九": 9,
+        "十": 10,
+        "几": 5,
+    }
+    for key, value in real_mapping.items():
+        if f"{key}张" in text or f"{key}个" in text or (key == "几" and "几张" in text):
+            return value
     m = re.search(r"(\d{1,2})\s*张", text)
     if m:
         return int(m.group(1))
@@ -198,6 +267,24 @@ def _heuristic_constraints(query: str, entities: dict[str, str]) -> ImageSearchC
     spatial_relations: list[SpatialRelationConstraint] = []
     action_relations: list[ActionRelationConstraint] = []
     object_relations: list[ObjectRelationConstraint] = []
+
+    real_pair_patterns = [
+        (r"左(?:边|侧)是?(?P<a>[^，。？！,?.\s右]{1,12}).*?右(?:边|侧)是?(?P<b>[^，。？！,?.\s]{1,12})", "left_right"),
+        (r"右(?:边|侧)是?(?P<a>[^，。？！,?.\s左]{1,12}).*?左(?:边|侧)是?(?P<b>[^，。？！,?.\s]{1,12})", "right_left"),
+        (r"前(?:面)?是?(?P<a>[^，。？！,?.\s后]{1,12}).*?后(?:面)?是?(?P<b>[^，。？！,?.\s]{1,12})", "front_back"),
+        (r"后(?:面)?是?(?P<a>[^，。？！,?.\s前]{1,12}).*?前(?:面)?是?(?P<b>[^，。？！,?.\s]{1,12})", "back_front"),
+    ]
+    for pattern, rel in real_pair_patterns:
+        m_real = re.search(pattern, text)
+        if not m_real:
+            continue
+        a = _clean_subject(m_real.group("a"))
+        b = _clean_subject(m_real.group("b"))
+        if a and b:
+            subjects.extend([a, b])
+            spatial_relations.append(
+                SpatialRelationConstraint(relation=rel, primary_subject=a, secondary_subject=b)
+            )
 
     for word, rel in _SPATIAL_KEYWORDS.items():
         if word not in text:
@@ -414,15 +501,16 @@ async def parse_image_search_constraints(
     cache_key = hashlib.md5(
         f"{query}::{json.dumps(entities, ensure_ascii=False, sort_keys=True)}".encode("utf-8")
     ).hexdigest()
-    cached = _image_parse_cache.get(cache_key)
     now = time.time()
-    if cached and now - cached[0] <= _IMAGE_PARSE_CACHE_TTL_SECONDS:
-        return cached[1]
+    cached = _image_parse_cache.get(cache_key, now)
+    if cached:
+        return cached
 
     api_key, base, model = _llm_env()
     heuristic = _heuristic_constraints(query, entities)
     if not api_key:
-        _image_parse_cache[cache_key] = (now, heuristic)
+        _image_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
+        _image_parse_cache.put(cache_key, heuristic, now)
         return heuristic
 
     schema = {
@@ -489,14 +577,17 @@ async def parse_image_search_constraints(
         obj = await _post_llm_json(base=base, api_key=api_key, payload=payload, retries=2)
         if not obj:
             logger.warning("image_query_parser_bad_json query=%s", query)
-            _image_parse_cache[cache_key] = (now, heuristic)
+            _image_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
+            _image_parse_cache.put(cache_key, heuristic, now)
             return heuristic
         parsed = _constraints_from_obj(query, obj, entities)
-        _image_parse_cache[cache_key] = (now, parsed)
+        _image_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
+        _image_parse_cache.put(cache_key, parsed, now)
         return parsed
     except Exception:
         logger.exception("image_query_parser_failed query=%s", query)
-        _image_parse_cache[cache_key] = (now, heuristic)
+        _image_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
+        _image_parse_cache.put(cache_key, heuristic, now)
         return heuristic
 
 
@@ -558,15 +649,16 @@ def _heuristic_general_constraints(query: str) -> GeneralQueryConstraints:
 
 async def parse_general_query_constraints(query: str) -> GeneralQueryConstraints:
     cache_key = hashlib.md5(query.encode("utf-8")).hexdigest()
-    cached = _general_parse_cache.get(cache_key)
     now = time.time()
-    if cached and now - cached[0] <= _GENERAL_PARSE_CACHE_TTL_SECONDS:
-        return cached[1]
+    cached = _general_parse_cache.get(cache_key, now)
+    if cached:
+        return cached
 
     api_key, base, model = _llm_env()
     heuristic = _heuristic_general_constraints(query)
     if not api_key:
-        _general_parse_cache[cache_key] = (now, heuristic)
+        _general_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
+        _general_parse_cache.put(cache_key, heuristic, now)
         return heuristic
 
     prompt = (
@@ -587,7 +679,8 @@ async def parse_general_query_constraints(query: str) -> GeneralQueryConstraints
         obj = await _post_llm_json(base=base, api_key=api_key, payload=payload, retries=1)
         if not obj:
             logger.warning("general_query_parser_bad_json query=%s", query)
-            _general_parse_cache[cache_key] = (now, heuristic)
+            _general_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
+            _general_parse_cache.put(cache_key, heuristic, now)
             return heuristic
         parsed = GeneralQueryConstraints(
             raw_query=query,
@@ -607,9 +700,11 @@ async def parse_general_query_constraints(query: str) -> GeneralQueryConstraints
             clarification_question=str(obj.get("clarification_question") or "").strip() or None,
             parser_source="llm",
         )
-        _general_parse_cache[cache_key] = (now, parsed)
+        _general_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
+        _general_parse_cache.put(cache_key, parsed, now)
         return parsed
     except Exception:
         logger.exception("general_query_parser_failed query=%s", query)
-        _general_parse_cache[cache_key] = (now, heuristic)
+        _general_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
+        _general_parse_cache.put(cache_key, heuristic, now)
         return heuristic

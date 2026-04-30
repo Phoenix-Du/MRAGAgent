@@ -13,6 +13,15 @@ from app.models.schemas import EvidenceItem, ImageItem, NormalizedDocument, Quer
 logger = logging.getLogger(__name__)
 
 
+def _local_fallback_answer() -> str:
+    return (
+        "\u8fd9\u662f\u672c\u5730\u964d\u7ea7\u56de\u7b54\uff1a"
+        "\u5df2\u5b8c\u6210\u4e0a\u4e0b\u6587\u68c0\u7d22\uff0c"
+        "\u4f46\u5f53\u524d\u6ca1\u6709\u8fde\u63a5\u771f\u5b9e RAG \u751f\u6210\u670d\u52a1\u3002"
+        "\u63a5\u5165 RAG Anything \u540e\u53ef\u8fd4\u56de\u771f\u5b9e\u591a\u6a21\u6001\u7b54\u6848\u3002"
+    )
+
+
 class RagClient:
     def __init__(self) -> None:
         self._store: dict[str, NormalizedDocument] = {}
@@ -39,7 +48,6 @@ class RagClient:
                     data = resp.json()
                     return self._map_ingest_response(data, documents)
             except (httpx.HTTPError, ValueError, TypeError):
-                # Degrade to local memory index to keep service available.
                 add_runtime_flag("rag_ingest_fallback")
                 logger.warning("rag_ingest_fallback reason=remote_ingest_failed")
                 metrics.inc("rag_ingest_fallback_total")
@@ -47,8 +55,11 @@ class RagClient:
         indexed_ids: list[str] = []
         for doc in documents:
             key = f"{tags.get('uid', 'unknown')}::{doc.doc_id}"
+            if key in self._store:
+                self._store.pop(key)
             self._store[key] = doc
             indexed_ids.append(doc.doc_id)
+        self._trim_store()
         return indexed_ids
 
     async def query(
@@ -74,12 +85,14 @@ class RagClient:
                     data = resp.json()
                     return self._map_query_response(data=data, trace_id=trace_id)
             except (httpx.HTTPError, ValueError, TypeError):
-                # Degrade to local fallback when endpoint schema or service is unstable.
                 add_runtime_flag("rag_query_fallback")
                 logger.warning("rag_query_fallback reason=remote_query_failed trace_id=%s uid=%s", trace_id, uid)
                 metrics.inc("rag_query_fallback_total")
 
-        # Local fallback retrieval: pick first few docs for this uid.
+        if not settings.allow_placeholder_fallback:
+            add_runtime_flag("rag_unavailable")
+            raise RuntimeError("RAG service unavailable and placeholder fallback is disabled")
+
         candidates = [
             doc
             for key, doc in self._store.items()
@@ -97,14 +110,15 @@ class RagClient:
 
         images = []
         for doc in candidates:
-            for m in doc.modal_elements:
-                if m.type == "image" and m.url:
-                    images.append(ImageItem(url=m.url, desc=m.desc))
+            for modal in doc.modal_elements:
+                if modal.type == "image" and modal.url:
+                    images.append(ImageItem(url=modal.url, desc=modal.desc))
 
         answer = (
-            "这是最小骨架返回：已完成上下文检索与回答生成占位。"
+            "这是本地降级回答：已完成上下文检索，但当前没有连接真实 RAG 生成服务。"
             "接入 RAG Anything 后可返回真实多模态答案。"
         )
+        answer = _local_fallback_answer()
         return QueryResponse(
             answer=answer,
             evidence=evidence,
@@ -127,7 +141,6 @@ class RagClient:
 
     @staticmethod
     def _map_query_response(data: dict[str, Any], trace_id: str) -> QueryResponse:
-        # Prefer direct contract first.
         if {"answer", "evidence", "images"}.issubset(data.keys()):
             payload = {
                 "answer": data.get("answer") or "",
@@ -187,3 +200,8 @@ class RagClient:
             latency_ms=int(data.get("latency_ms") or 0),
         )
 
+    def _trim_store(self) -> None:
+        max_docs = max(1, int(settings.local_rag_store_max_docs))
+        while len(self._store) > max_docs:
+            oldest_key = next(iter(self._store))
+            self._store.pop(oldest_key, None)

@@ -185,6 +185,10 @@ class SearchClient:
                 metrics.inc("search_fallback_total")
                 logger.warning("search_fallback_used reason=direct_serpapi_failed")
 
+        if not settings.allow_placeholder_fallback:
+            add_runtime_flag("search_unavailable")
+            return []
+
         # Fallback placeholder hits.
         hits: list[SourceDoc] = []
         for idx in range(1, top_k + 1):
@@ -292,6 +296,10 @@ class CrawlClient:
                     add_runtime_flag("crawl_fallback")
                     logger.warning("crawl_fallback_used url=%s", url)
                     metrics.inc("crawl_fallback_total")
+
+        if not settings.allow_placeholder_fallback:
+            add_runtime_flag("crawl_unavailable")
+            raise RuntimeError(f"crawl unavailable for url={url}")
 
         # Fallback placeholder.
         return SourceDoc(
@@ -611,4 +619,3 @@ class ImagePipelineClient:
                 )
             )
         return mapped
-

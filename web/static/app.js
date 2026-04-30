@@ -33,8 +33,8 @@ function renderEvidence(evidence) {
       const sc =
         e.score != null && !Number.isNaN(Number(e.score))
           ? Number(e.score).toFixed(2)
-          : "—";
-      return `<div class="evidence-item"><strong>${escapeHtml(e.doc_id || "")}</strong> · score ${sc}<br/>${sn}</div>`;
+          : "-";
+      return `<div class="evidence-item"><strong>${escapeHtml(e.doc_id || "")}</strong> - score ${sc}<br/>${sn}</div>`;
     })
     .join("");
   return `<div class="evidence-block"><div class="evidence-title">引用片段</div>${items}</div>`;
@@ -163,7 +163,7 @@ function init() {
       const lat = data.latency_ms ?? "";
       const flags = data.runtime_flags ?? [];
 
-      const meta = `<div class="msg-meta">trace <code>${escapeHtml(String(trace))}</code> · route <code>${escapeHtml(String(route))}</code> · ${escapeHtml(String(lat))} ms</div>`;
+      const meta = `<div class="msg-meta">trace <code>${escapeHtml(String(trace))}</code> - route <code>${escapeHtml(String(route))}</code> - ${escapeHtml(String(lat))} ms</div>`;
       const inner = `<div class="msg-role">助手</div><div class="msg-body">${escapeHtml(answer)}</div>${meta}${renderFlags(flags)}${renderEvidence(data.evidence)}${renderImages(data.images)}`;
       appendMessage("assistant", inner);
     } catch (err) {

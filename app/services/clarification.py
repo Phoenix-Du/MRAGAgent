@@ -69,10 +69,10 @@ def should_clarify(
         city = entities.get("city") or extract_city(query)
         default_city = str(preferences.get("default_city") or "").strip()
         if city:
-            rewritten = f"{city} {query}"
+            rewritten = query if city in query else f"{city} {query}"
             return ClarificationDecision(False, scenario="weather", rewritten_query=rewritten)
         if default_city:
-            rewritten = f"{default_city} {query}"
+            rewritten = query if default_city in query else f"{default_city} {query}"
             return ClarificationDecision(False, scenario="weather", rewritten_query=rewritten)
         return ClarificationDecision(
             True,

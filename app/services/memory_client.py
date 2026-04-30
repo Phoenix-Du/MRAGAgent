@@ -185,7 +185,10 @@ class MemoryClient:
             {"query": row["query_text"], "answer": row["answer_text"], "intent": row["intent"]}
             for row in history_rows
         ]
-        preferences = {row["pref_key"]: row["pref_value"] for row in pref_rows}
+        preferences = {
+            row["pref_key"]: self._decode_pref_value(row["pref_value"])
+            for row in pref_rows
+        }
         return {"history": history, "preferences": preferences}
 
     async def _write_to_mysql(self, uid: str, query: str, answer: str, intent: str) -> None:
@@ -202,6 +205,15 @@ class MemoryClient:
                     """,
                     (uid, query, answer, intent),
                 )
+
+    @staticmethod
+    def _decode_pref_value(value: Any) -> Any:
+        if isinstance(value, str):
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                return value
+        return value
 
     async def _set_preference_mysql(self, uid: str, key: str, value: Any) -> None:
         ready = await self._ensure_mysql_pool()
