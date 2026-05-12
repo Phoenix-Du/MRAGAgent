@@ -18,6 +18,7 @@ class BridgeSettings(BaseSettings):
     qwen_model: str = "qwen-plus"
     qwen_parser_model: str = "qwen3.5-plus"
     qwen_vlm_model: str = "qwen3.5-omni-plus-2026-03-15"
+    planner_timeout_seconds: int = 12
     request_timeout_seconds: int = 30
     parser_read_timeout_seconds: int = 120
     parser_cache_max_entries: int = 256
@@ -33,6 +34,7 @@ class BridgeSettings(BaseSettings):
     raganything_parser: str = "mineru"
     raganything_query_mode: str = "hybrid"
     raganything_add_scripts_dir_to_path: bool = True
+    raganything_full_ingest_enabled: bool = False
 
     # Image pipeline bridge
     serpapi_api_keys: str | None = None
@@ -41,7 +43,6 @@ class BridgeSettings(BaseSettings):
     chinese_clip_local_files_only: bool = True
     image_cache_dir: str = "./raganything_storage/image_pipeline_cache"
     image_search_provider: str = "serpapi"
-    image_vlm_rank_enabled: bool = True
     image_top_k_default: int = 5
     image_cache_ttl_hours: int = 72
     image_cache_cleanup_interval_seconds: int = 1800
@@ -54,8 +55,9 @@ class BridgeSettings(BaseSettings):
     image_clip_download_concurrency: int = 6
     image_clip_keep: int | None = None
     image_clip_min_score: float = 0.18
+    image_multi_query_enabled: bool = True
+    image_multi_query_max_variants: int = 2
     image_final_max_check: int | None = None
-    image_vlm_rank_pool: int | None = None
 
 
 bridge_settings = BridgeSettings()

@@ -48,7 +48,12 @@ async def post_llm_json(
 ) -> dict[str, Any] | None:
     timeout = httpx.Timeout(
         connect=float(bridge_settings.request_timeout_seconds),
-        read=float(bridge_settings.parser_read_timeout_seconds),
+        read=float(
+            min(
+                bridge_settings.parser_read_timeout_seconds,
+                bridge_settings.request_timeout_seconds,
+            )
+        ),
         write=float(bridge_settings.request_timeout_seconds),
         pool=float(bridge_settings.request_timeout_seconds),
     )

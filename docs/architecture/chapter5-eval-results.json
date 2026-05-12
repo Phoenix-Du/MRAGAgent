@@ -1,0 +1,1836 @@
+{
+  "generated_at": "2026-05-07 16:46:55",
+  "environment": {
+    "python": "3.10.0",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "packages": {
+      "fastapi": "0.136.1",
+      "pydantic": "2.13.3",
+      "httpx": "0.28.1",
+      "pytest": "9.0.3",
+      "crawl4ai": "0.8.6",
+      "raganything": "1.2.10",
+      "torch": "2.11.0+cpu",
+      "transformers": "4.57.3",
+      "playwright": "installed",
+      "redis": "5.0.1",
+      "aiomysql": "0.3.2"
+    },
+    "settings": {
+      "memory_backend": "memory",
+      "crawl4ai_local_enabled": true,
+      "crawl4ai_endpoint_configured": false,
+      "web_crawl_concurrency": 3,
+      "web_search_candidates_n": 12,
+      "web_url_select_m": 5,
+      "general_qa_body_rerank_enabled": true,
+      "rag_anything_endpoint_configured": true,
+      "image_pipeline_endpoint_configured": true,
+      "image_search_ingest_enabled": false,
+      "serpapi_configured": true,
+      "llm_configured": true,
+      "vlm_model": "qwen3.5-omni-plus-2026-03-15",
+      "chinese_clip_model": "d:/multimodal-rag-agent/models/chinese-clip-vit-base-patch16"
+    }
+  },
+  "service_health": [
+    {
+      "service": "orchestrator",
+      "url": "http://127.0.0.1:8000/healthz",
+      "ok": true,
+      "status_code": 200,
+      "latency_ms": 22
+    },
+    {
+      "service": "raganything-bridge",
+      "url": "http://127.0.0.1:9002/healthz",
+      "ok": true,
+      "status_code": 200,
+      "latency_ms": 6
+    },
+    {
+      "service": "image-pipeline",
+      "url": "http://127.0.0.1:9010/healthz",
+      "ok": true,
+      "status_code": 200,
+      "latency_ms": 7
+    },
+    {
+      "service": "rasa",
+      "url": "http://127.0.0.1:5005/version",
+      "ok": false,
+      "status_code": null,
+      "latency_ms": 2054,
+      "error": "ConnectError"
+    }
+  ],
+  "pytest_baseline": {
+    "returncode": 0,
+    "elapsed_seconds": 67.67,
+    "passed": 69,
+    "failed": 0,
+    "warnings": 1,
+    "summary_line": "69 passed, 1 warning in 64.95s (0:01:04)"
+  },
+  "crawl4ai_probe": {
+    "ok": true,
+    "source": "crawl4ai_local_sdk",
+    "latency_ms": 4865,
+    "text_length": 166,
+    "has_crawl4ai_full": true,
+    "runtime_flags": [],
+    "preview": "# Example Domain\nThis domain is for use in documentation examples without needing permission. Avoid use in operations.\n[Learn more](https://iana.org/domains/example)\n"
+  },
+  "functional_tests": {
+    "cases": [
+      {
+        "id": "F001",
+        "category": "接口基础",
+        "name": "健康检查",
+        "passed": true,
+        "latency_ms": 2,
+        "expected": "status=ok",
+        "actual": "ok",
+        "status_code": 200,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F002",
+        "category": "接口基础",
+        "name": "指标端点",
+        "passed": true,
+        "latency_ms": 2,
+        "expected": "返回 Prometheus 文本",
+        "actual": "# HELP mmrag_requests_total Total chat requests.\n# TYPE mmrag_requests_total counter\nmmrag_requests_total 0\n# HELP mmrag_requests_success_total Successful chat requests.\n# TYPE mmrag_requests_success_total counter\nmmrag_requests_success_total 0\n# HELP mmrag_re",
+        "status_code": 200,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F003",
+        "category": "接口基础",
+        "name": "进度不存在",
+        "passed": true,
+        "latency_ms": 2,
+        "expected": "status=not_found",
+        "actual": "not_found",
+        "status_code": 200,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F004",
+        "category": "通用问答",
+        "name": "直传证据问答-1",
+        "passed": true,
+        "latency_ms": 3660,
+        "expected": "200 + general_qa + answer",
+        "actual": "本系统的统一服务入口是 FastAPI。\n\n其关键机制是通过 FastAPI 框架提供标准化的 HTTP 接口，核心接口为 POST 请求路径 `/v1/chat/query`，该接口统一接收用户查询并返回结构化响应，包括答案（answer）、证据（evidence）、图像（images）、追踪标识（trace_id）、延迟（latency_ms）、路由信息（route）和运行时标志（runtime_flags）。\n\n常见应用场景包括多模态问答、图文联合检索与生成、以及基于证据的可解释性推理服务。",
+        "status_code": 200,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ]
+      },
+      {
+        "id": "F005",
+        "category": "通用问答",
+        "name": "直传证据问答-2",
+        "passed": true,
+        "latency_ms": 8060,
+        "expected": "200 + general_qa + answer",
+        "actual": "核心问答接口路径是 POST /v1/chat/query。\n\n该接口是系统统一的服务入口，基于 FastAPI 构建，用于接收用户提问并返回结构化响应，包括答案（answer）、支撑证据（evidence）、相关图像（images）、追踪标识（trace_id）、响应延迟（latency_ms）、路由信息（route）和运行时标志（runtime_flags）。\n\n常见应用场景包括：多模态问答服务调用、RAG 系统集成、AI 助手后端对接、以及需要同时返回文本答案与图文证据的智能交互场景。",
+        "status_code": 200,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ]
+      },
+      {
+        "id": "F006",
+        "category": "通用问答",
+        "name": "直传证据问答-3",
+        "passed": true,
+        "latency_ms": 3543,
+        "expected": "200 + general_qa + answer",
+        "actual": "根据当前证据，可以得到以下结论：\n1. 本系统采用 FastAPI 作为统一服务入口，核心接口为 POST /v1/chat/query，并返回 answer、evidence、images、trace_id、latency_ms、route 和 runtime_flags。\n2. 本系统采用 FastAPI 作为统一服务入口，核心接口为 POST /v1/chat/query，并返回 answer、evidence、images、trace_id、latency_ms、route 和 runtime_flags。",
+        "status_code": 200,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ]
+      },
+      {
+        "id": "F007",
+        "category": "通用问答",
+        "name": "直传证据问答-4",
+        "passed": true,
+        "latency_ms": 1778,
+        "expected": "200 + general_qa + answer",
+        "actual": "是，响应里包含 evidence 字段。\n\n根据系统接口定义，POST /v1/chat/query 接口的返回字段明确包含 `evidence`。",
+        "status_code": 200,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ]
+      },
+      {
+        "id": "F008",
+        "category": "通用问答",
+        "name": "直传证据问答-5",
+        "passed": true,
+        "latency_ms": 2255,
+        "expected": "200 + general_qa + answer",
+        "actual": "系统使用 FastAPI 作为主服务框架。",
+        "status_code": 200,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ]
+      },
+      {
+        "id": "F009",
+        "category": "通用问答",
+        "name": "直传证据问答-6",
+        "passed": true,
+        "latency_ms": 286,
+        "expected": "200 + general_qa + answer",
+        "actual": "根据当前证据，可以得到以下结论：\n1. 本系统采用 FastAPI 作为统一服务入口，核心接口为 POST /v1/chat/query，并返回 answer、evidence、images、trace_id、latency_ms、route 和 runtime_flags。\n2. 本系统采用 FastAPI 作为统一服务入口，核心接口为 POST /v1/chat/query，并返回 answer、evidence、images、trace_id、latency_ms、route 和 runtime_flags。",
+        "status_code": 200,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ]
+      },
+      {
+        "id": "F010",
+        "category": "请求校验",
+        "name": "拒绝内部 image_search_query",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F011",
+        "category": "请求校验",
+        "name": "拒绝空 uid",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F012",
+        "category": "请求校验",
+        "name": "拒绝空 query",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F013",
+        "category": "请求校验",
+        "name": "拒绝过长 query",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F014",
+        "category": "请求校验",
+        "name": "拒绝 max_images=0",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F015",
+        "category": "请求校验",
+        "name": "拒绝 max_images=13",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F016",
+        "category": "请求校验",
+        "name": "拒绝 max_web_docs=0",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F017",
+        "category": "请求校验",
+        "name": "拒绝 max_web_docs=11",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F018",
+        "category": "请求校验",
+        "name": "拒绝 max_web_candidates=51",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F019",
+        "category": "请求校验",
+        "name": "拒绝 confidence<0",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F020",
+        "category": "请求校验",
+        "name": "拒绝 confidence>1",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F021",
+        "category": "请求校验",
+        "name": "接受显式 general_qa",
+        "passed": true,
+        "latency_ms": 1,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F022",
+        "category": "请求校验",
+        "name": "接受显式 image_search",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F023",
+        "category": "请求校验",
+        "name": "拒绝非法 intent",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F024",
+        "category": "请求校验",
+        "name": "拒绝 ftp URL",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F025",
+        "category": "请求校验",
+        "name": "拒绝 localhost URL",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F026",
+        "category": "请求校验",
+        "name": "拒绝私有 IP URL",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F027",
+        "category": "请求校验",
+        "name": "接受公网 HTTPS URL",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "Pydantic 边界符合预期",
+        "actual": "accepted=True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F028",
+        "category": "URL安全",
+        "name": "https 公网",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "is_safe_public_http_url=True",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F029",
+        "category": "URL安全",
+        "name": "http 公网",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "is_safe_public_http_url=True",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F030",
+        "category": "URL安全",
+        "name": "loopback",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "is_safe_public_http_url=False",
+        "actual": "False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F031",
+        "category": "URL安全",
+        "name": "private",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "is_safe_public_http_url=False",
+        "actual": "False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F032",
+        "category": "URL安全",
+        "name": "link-local",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "is_safe_public_http_url=False",
+        "actual": "False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F033",
+        "category": "URL安全",
+        "name": "javascript scheme",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "is_safe_public_http_url=False",
+        "actual": "False",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F034",
+        "category": "意图识别",
+        "name": "中文图片请求",
+        "passed": true,
+        "latency_ms": 2,
+        "expected": "启发式结果正确",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F035",
+        "category": "意图识别",
+        "name": "空间图片请求",
+        "passed": true,
+        "latency_ms": 1,
+        "expected": "启发式结果正确",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F036",
+        "category": "意图识别",
+        "name": "网页总结请求",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "启发式结果正确",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F037",
+        "category": "意图识别",
+        "name": "天气请求",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "启发式结果正确",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F038",
+        "category": "意图识别",
+        "name": "英文 image request",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "启发式结果正确",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F039",
+        "category": "意图识别",
+        "name": "英文 QA request",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "启发式结果正确",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F040",
+        "category": "约束解析",
+        "name": "图片主体解析",
+        "passed": true,
+        "latency_ms": 17,
+        "expected": "解析出结构化约束",
+        "actual": "{'raw_query': '给我三张金毛照片', 'search_rewrite': '三张金毛 同框 合影 照片', 'entities': {'subjects': ['三张金毛'], 'landmark': None, 'time_of_day': None, 'style_terms': []}, 'visual_attributes': [], 'relations': [], 'negative_constraints': [], 'count': 3, 'must_have_all_subjects",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F041",
+        "category": "约束解析",
+        "name": "图片空间关系解析",
+        "passed": true,
+        "latency_ms": 4,
+        "expected": "解析出结构化约束",
+        "actual": "{'raw_query': '左边是边牧右边是金毛的照片', 'search_rewrite': '边牧 毛 边牧右边是金毛 金 互动 照片', 'entities': {'subjects': ['边牧', '毛', '边牧右边是金毛'], 'landmark': None, 'time_of_day': None, 'style_terms': []}, 'visual_attributes': ['金'], 'relations': [{'type': 'spatial', 'relation': 'left",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F042",
+        "category": "约束解析",
+        "name": "图片地点/场景解析",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "解析出结构化约束",
+        "actual": "{'raw_query': '杭州西湖夜景照片', 'search_rewrite': '杭州西湖夜景 照片', 'entities': {'subjects': ['杭州西湖夜景'], 'landmark': None, 'time_of_day': None, 'style_terms': []}, 'visual_attributes': [], 'relations': [], 'negative_constraints': [], 'count': None, 'must_have_all_subject",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F043",
+        "category": "约束解析",
+        "name": "通用天气地点解析",
+        "passed": true,
+        "latency_ms": 3,
+        "expected": "解析出结构化约束",
+        "actual": "{'raw_query': '杭州今天会下雨吗', 'search_rewrite': '杭州今天会下雨吗', 'entities': {'location': '杭州'}, 'attributes': [], 'compare_targets': [], 'needs_clarification': False, 'clarification_question': None, 'parser_source': 'heuristic'}",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F044",
+        "category": "约束解析",
+        "name": "通用对比解析",
+        "passed": true,
+        "latency_ms": 1,
+        "expected": "解析出结构化约束",
+        "actual": "{'raw_query': '比较 FastAPI 和 Flask 的区别', 'search_rewrite': '比较 FastAPI 和 Flask 的区别', 'entities': {}, 'attributes': [], 'compare_targets': ['比较 FastAPI', 'Flask 的区别'], 'needs_clarification': False, 'clarification_question': None, 'parser_source': 'heuristic'}",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F045",
+        "category": "查询改写",
+        "name": "网页问答改写去口语",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "包含 FastAPI",
+        "actual": "搜索 FastAPI 是什么",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F046",
+        "category": "查询改写",
+        "name": "图片实体改写",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "包含 猫",
+        "actual": "猫的照片 图片",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F047",
+        "category": "查询改写",
+        "name": "英文图片改写",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "包含 dog",
+        "actual": "find dog photo 图片",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F048",
+        "category": "执行上下文",
+        "name": "图片检索 query 与原问题分离",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "image_search_query 使用 rewrite",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F049",
+        "category": "执行上下文",
+        "name": "通用问答使用 planner rewrite",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "query 使用 rewrite",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F050",
+        "category": "澄清状态",
+        "name": "天气缺城市触发澄清",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "should_ask=True",
+        "actual": "你想查询哪个城市的天气？",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F051",
+        "category": "澄清状态",
+        "name": "天气有城市不澄清",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "should_ask=False",
+        "actual": "general_qa",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F052",
+        "category": "澄清状态",
+        "name": "泛化图片触发澄清",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "should_ask=True",
+        "actual": "你想看什么主体的图片？",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F053",
+        "category": "RAG桥接",
+        "name": "抽取式 fallback 命中 FastAPI",
+        "passed": true,
+        "latency_ms": 1,
+        "expected": "答案包含 FastAPI",
+        "actual": "FastAPI 是本系统的统一入口，负责 API 编排。",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F054",
+        "category": "RAG桥接",
+        "name": "抽取式 fallback 命中图像链路",
+        "passed": true,
+        "latency_ms": 1,
+        "expected": "答案包含 Chinese-CLIP",
+        "actual": "文搜图链路包含图像召回、可达性验证、Chinese-CLIP 和 VLM。",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F055",
+        "category": "API编排",
+        "name": "快速全链路-general_qa",
+        "passed": true,
+        "latency_ms": 7,
+        "expected": "200 + route",
+        "actual": "ok-general_qa",
+        "status_code": 200,
+        "route": "general_qa",
+        "runtime_flags": [
+          "functional_fake_adapter"
+        ]
+      },
+      {
+        "id": "F056",
+        "category": "API编排",
+        "name": "快速全链路-image_search",
+        "passed": true,
+        "latency_ms": 2,
+        "expected": "200 + route",
+        "actual": "ok-image_search",
+        "status_code": 200,
+        "route": "image_search",
+        "runtime_flags": [
+          "functional_fake_adapter"
+        ]
+      },
+      {
+        "id": "F057",
+        "category": "API编排",
+        "name": "快速全链路-general_qa",
+        "passed": true,
+        "latency_ms": 2,
+        "expected": "200 + route",
+        "actual": "ok-general_qa",
+        "status_code": 200,
+        "route": "general_qa",
+        "runtime_flags": [
+          "functional_fake_adapter"
+        ]
+      },
+      {
+        "id": "F058",
+        "category": "API编排",
+        "name": "快速全链路-image_search",
+        "passed": true,
+        "latency_ms": 3,
+        "expected": "200 + route",
+        "actual": "ok-image_search",
+        "status_code": 200,
+        "route": "image_search",
+        "runtime_flags": [
+          "functional_fake_adapter"
+        ]
+      },
+      {
+        "id": "F059",
+        "category": "图片代理",
+        "name": "拒绝 loopback 远程图片",
+        "passed": true,
+        "latency_ms": 26,
+        "expected": "HTTP 400",
+        "actual": "Image proxy host is not allowed",
+        "status_code": 400,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F060",
+        "category": "图片代理",
+        "name": "拒绝非白名单本地路径",
+        "passed": true,
+        "latency_ms": 5,
+        "expected": "HTTP 403",
+        "actual": "Local image path is not allowed",
+        "status_code": 403,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F061",
+        "category": "Crawl4AI",
+        "name": "SDK 导入可用",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "import crawl4ai 成功",
+        "actual": "0.8.6",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      },
+      {
+        "id": "F062",
+        "category": "数据模型",
+        "name": "QueryExecutionContext 保留 original_query",
+        "passed": true,
+        "latency_ms": 0,
+        "expected": "original_query 不丢失",
+        "actual": "True",
+        "status_code": null,
+        "route": null,
+        "runtime_flags": []
+      }
+    ],
+    "summary": {
+      "count": 62,
+      "passed": 62,
+      "failed": 0,
+      "pass_rate": 1.0,
+      "latency": {
+        "count": 62,
+        "avg_ms": 317.16,
+        "p50_ms": 0,
+        "p95_ms": 2255,
+        "max_ms": 8060
+      },
+      "categories": {
+        "接口基础": {
+          "count": 3,
+          "passed": 3,
+          "pass_rate": 1.0
+        },
+        "通用问答": {
+          "count": 6,
+          "passed": 6,
+          "pass_rate": 1.0
+        },
+        "请求校验": {
+          "count": 18,
+          "passed": 18,
+          "pass_rate": 1.0
+        },
+        "URL安全": {
+          "count": 6,
+          "passed": 6,
+          "pass_rate": 1.0
+        },
+        "意图识别": {
+          "count": 6,
+          "passed": 6,
+          "pass_rate": 1.0
+        },
+        "约束解析": {
+          "count": 5,
+          "passed": 5,
+          "pass_rate": 1.0
+        },
+        "查询改写": {
+          "count": 3,
+          "passed": 3,
+          "pass_rate": 1.0
+        },
+        "执行上下文": {
+          "count": 2,
+          "passed": 2,
+          "pass_rate": 1.0
+        },
+        "澄清状态": {
+          "count": 3,
+          "passed": 3,
+          "pass_rate": 1.0
+        },
+        "RAG桥接": {
+          "count": 2,
+          "passed": 2,
+          "pass_rate": 1.0
+        },
+        "API编排": {
+          "count": 4,
+          "passed": 4,
+          "pass_rate": 1.0
+        },
+        "图片代理": {
+          "count": 2,
+          "passed": 2,
+          "pass_rate": 1.0
+        },
+        "Crawl4AI": {
+          "count": 1,
+          "passed": 1,
+          "pass_rate": 1.0
+        },
+        "数据模型": {
+          "count": 1,
+          "passed": 1,
+          "pass_rate": 1.0
+        }
+      }
+    }
+  },
+  "asgi_overhead_benchmark": [
+    {
+      "concurrency": 1,
+      "requests": 40,
+      "success": 40,
+      "elapsed_ms": 48,
+      "throughput_qps": 833.33,
+      "avg_latency_ms": 1.12,
+      "p50_latency_ms": 1,
+      "p95_latency_ms": 2,
+      "max_latency_ms": 2
+    },
+    {
+      "concurrency": 5,
+      "requests": 80,
+      "success": 80,
+      "elapsed_ms": 89,
+      "throughput_qps": 898.88,
+      "avg_latency_ms": 1.09,
+      "p50_latency_ms": 1,
+      "p95_latency_ms": 2,
+      "max_latency_ms": 4
+    },
+    {
+      "concurrency": 10,
+      "requests": 120,
+      "success": 120,
+      "elapsed_ms": 154,
+      "throughput_qps": 779.22,
+      "avg_latency_ms": 1.26,
+      "p50_latency_ms": 1,
+      "p95_latency_ms": 2,
+      "max_latency_ms": 4
+    },
+    {
+      "concurrency": 20,
+      "requests": 160,
+      "success": 160,
+      "elapsed_ms": 178,
+      "throughput_qps": 898.88,
+      "avg_latency_ms": 1.04,
+      "p50_latency_ms": 1,
+      "p95_latency_ms": 2,
+      "max_latency_ms": 2
+    }
+  ],
+  "answer_quality": {
+    "dataset": "15 project-specific evidence-grounded QA cases; metrics inspired by HotpotQA exact answer checking and RAGAS faithfulness/relevancy dimensions.",
+    "reference_notes": [
+      "HotpotQA evaluates multi-hop, evidence-supported QA.",
+      "RAGAS lists response relevancy, faithfulness, context precision and context recall as RAG metrics."
+    ],
+    "cases": [
+      {
+        "case_id": "A01",
+        "question": "本系统采用什么框架作为统一服务入口？",
+        "expected_answer": "FastAPI",
+        "status_code": 200,
+        "latency_ms": 1730,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "本系统采用 FastAPI 作为统一服务入口。  \n该框架负责挂载前端静态页面、健康检查端点、指标端点，以及 `/v1/chat/query` 问答接口。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.891
+      },
+      {
+        "case_id": "A02",
+        "question": "核心聊天接口路径是什么？",
+        "expected_answer": "/v1/chat/query",
+        "status_code": 200,
+        "latency_ms": 3610,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "根据当前证据，可以得到以下结论：\n1. 核心聊天接口路径是 POST /v1/chat/query，响应包含 answer、evidence、images、trace_id、latency_ms、route 和 runtime_flags。\n2. 核心聊天接口路径是 POST /v1/chat/query，响应包含 answer、evidence、images、trace_id、latency_ms、route 和 runtime_flags。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.765
+      },
+      {
+        "case_id": "A03",
+        "question": "通用问答链路在没有用户直传材料时先做什么？",
+        "expected_answer": "网页搜索",
+        "status_code": 200,
+        "latency_ms": 293,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "根据当前证据，可以得到以下结论：\n1. 通用问答链路在没有 source_docs 或 url 时，会先执行网页搜索召回候选页面，再进行重排、URL 安全过滤、网页采集和 RAG 回答。\n2. 通用问答链路在没有 source_docs 或 url 时，会先执行网页搜索召回候选页面，再进行重排、URL 安全过滤、网页采集和 RAG 回答。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.849
+      },
+      {
+        "case_id": "A04",
+        "question": "网页采集模块优先使用什么能力？",
+        "expected_answer": "Crawl4AI",
+        "status_code": 200,
+        "latency_ms": 270,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "根据当前证据，可以得到以下结论：\n1. 网页采集模块优先使用 Crawl4AI 本地 SDK 或服务，获得 Markdown、HTML、媒体、链接和表格等结构化网页内容。\n2. 网页采集模块优先使用 Crawl4AI 本地 SDK 或服务，获得 Markdown、HTML、媒体、链接和表格等结构化网页内容。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.837
+      },
+      {
+        "case_id": "A05",
+        "question": "RAGAnything Bridge 的作用是什么？",
+        "expected_answer": "content_list",
+        "status_code": 200,
+        "latency_ms": 3167,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "RAGAnything Bridge 的作用是将系统内部的 SourceDoc 和 NormalizedDocument 统一转换为 RAGAnything 模型可处理的 content_list 格式。  \n其关键机制是实现多模态数据（文本、图片、表格）的标准化封装与入库适配。  \n常见应用场景包括多模态文档解析后的向量化前处理、跨格式内容统一接入 RAGAnything 检索流程。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.322
+      },
+      {
+        "case_id": "A06",
+        "question": "文搜图链路如何提升图片可用性？",
+        "expected_answer": "可达性验证",
+        "status_code": 200,
+        "latency_ms": 8030,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "文搜图链路通过以下两个步骤提升图片可用性：\n\n1. **执行图片可达性验证**：在搜索召回后，对返回的图片链接进行实时连通性检测，过滤掉已失效或无法访问的远程图片，避免后续模块（如CLIP图像编码、VLM多模态理解、前端渲染）因链接失效而失败。\n\n2. **实施本地缓存**：对验证有效的图片进行下载并存储至本地缓存系统，确保后续调用时可稳定、低延迟地获取图片资源，消除网络波动或源站下线导致的不可用风险。\n\n注意事项：  \n- 可达性验证需覆盖HTTP状态码、响应超时、图片格式有效性等维度，不能仅依赖链接格式判断；  \n- 本地缓存需配套版本管理与过期策略，防止陈旧图片长期滞留；  \n- 该机制",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.367
+      },
+      {
+        "case_id": "A07",
+        "question": "文搜图链路使用什么模型做中文图文粗排？",
+        "expected_answer": "Chinese-CLIP",
+        "status_code": 200,
+        "latency_ms": 2604,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "文搜图链路使用 Chinese-CLIP 模型进行中文图文粗排。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.895
+      },
+      {
+        "case_id": "A08",
+        "question": "图像最终回答主要由什么模型完成？",
+        "expected_answer": "VLM",
+        "status_code": 200,
+        "latency_ms": 1549,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "图像最终回答主要由视觉语言模型（VLM）完成。  \n该模型负责对候选图片进行排序、空间约束判断，并生成自然语言解释。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.766
+      },
+      {
+        "case_id": "A09",
+        "question": "系统如何标记降级路径？",
+        "expected_answer": "runtime_flags",
+        "status_code": 200,
+        "latency_ms": 3862,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "系统通过 runtime_flags 标记降级路径，具体包括 search_fallback、crawl_http_fallback、rag_query_fallback、image_pipeline_fallback 等。  \n\n注意事项：  \n- 所有降级路径均统一由 runtime_flags 机制进行标记；  \n- 证据未说明标记的具体取值规则（如 true/false、数值编码等）、触发条件、动态更新方式或配置位置，因此无法提供相关操作步骤；  \n- 若需实现或调试降级路径标记，需进一步查阅 runtime_flags 的配置规范与运行时管理逻辑。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.336
+      },
+      {
+        "case_id": "A10",
+        "question": "系统如何防止 SSRF？",
+        "expected_answer": "URL 安全",
+        "status_code": 200,
+        "latency_ms": 8402,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "系统防止 SSRF 的做法如下：\n\n1. 对用户提交或系统构造的 URL 进行安全校验，明确拒绝以下类型地址：  \n　　- 非 http 或 https 协议的 URL；  \n　　- 指向本地回环地址（如 localhost、127.0.0.1 等）的 URL；  \n　　- 指向私有网络地址（如 10.0.0.0/8、172.16.0.0/12、192.168.0.0/16 等）的 URL；  \n　　- 指向链路本地地址（如 169.254.0.0/16）的 URL；  \n　　- 其他被识别为 loopback 或 link-local 的地址。\n\n2. 在图片代理等涉及重定向的场景中，在重定",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.288
+      },
+      {
+        "case_id": "A11",
+        "question": "MemoryClient 支持哪些后端？",
+        "expected_answer": "memory",
+        "status_code": 200,
+        "latency_ms": 282,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "根据当前证据，可以得到以下结论：\n1. MemoryClient 支持 memory、Redis、MySQL 和 hybrid 等后端，用于保存对话记忆、用户偏好和 pending_clarification。\n2. MemoryClient 支持 memory、Redis、MySQL 和 hybrid 等后端，用于保存对话记忆、用户偏好和 pending_clarification。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.75
+      },
+      {
+        "case_id": "A12",
+        "question": "澄清状态主要解决什么问题？",
+        "expected_answer": "缺失槽位",
+        "status_code": 200,
+        "latency_ms": 289,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "根据当前证据，可以得到以下结论：\n1. 澄清状态主要解决天气缺城市、泛化图片请求等缺失槽位问题，并在用户下一轮回复时合并原始问题。\n2. 澄清状态主要解决天气缺城市、泛化图片请求等缺失槽位问题，并在用户下一轮回复时合并原始问题。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.85
+      },
+      {
+        "case_id": "A13",
+        "question": "为什么 image_search 默认跳过普通 RAG ingest？",
+        "expected_answer": "VLM",
+        "status_code": 200,
+        "latency_ms": 244,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "根据当前证据，可以得到以下结论：\n1. image_search 默认跳过普通 RAG ingest，因为最终答案由 VLM 直接基于图片证据生成。\n2. image_search 默认跳过普通 RAG ingest，因为最终答案由 VLM 直接基于图片证据生成。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.819
+      },
+      {
+        "case_id": "A14",
+        "question": "进度事件给前端提供什么能力？",
+        "expected_answer": "阶段",
+        "status_code": 200,
+        "latency_ms": 1738,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "progress_event 给前端提供阶段化执行轨迹的能力，具体包括：  \n- 意图规划  \n- 搜索  \n- 采集  \n- 入库  \n- 最终问答生成",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.833
+      },
+      {
+        "case_id": "A15",
+        "question": "系统的两个一等任务路由是什么？",
+        "expected_answer": "general_qa",
+        "status_code": 200,
+        "latency_ms": 6131,
+        "route": "general_qa",
+        "runtime_flags": [
+          "general_query_context_direct"
+        ],
+        "answer_preview": "系统的两个一等任务路由是 general_qa 和 image_search。  \n其中，general_qa 路由负责处理通用问答任务，image_search 路由负责处理文搜图任务。  \n这类任务路由常见于多模态 RAG 系统中，用于根据用户查询类型自动分发至对应的专业处理模块，以提升响应准确性和效率。",
+        "answer_correct": true,
+        "context_contains_expected": true,
+        "faithfulness_proxy": 0.522
+      }
+    ],
+    "summary": {
+      "count": 15,
+      "success_status_rate": 1.0,
+      "answer_correct_rate": 1.0,
+      "context_contains_expected_rate": 1.0,
+      "avg_faithfulness_proxy": 0.673,
+      "latency": {
+        "count": 15,
+        "avg_ms": 2813.4,
+        "p50_ms": 1738,
+        "p95_ms": 8402,
+        "max_ms": 8402
+      }
+    }
+  },
+  "retrieval_quality": {
+    "dataset": "15 project-specific retrieval cases; metrics follow BEIR-style top-k retrieval reporting.",
+    "reference_notes": [
+      "BEIR is a heterogeneous benchmark for evaluating information retrieval systems; common reports include top-k ranking metrics such as nDCG and MRR."
+    ],
+    "cases": [
+      {
+        "query": "Crawl4AI Markdown media tables webpage parsing",
+        "relevant_doc": "doc-crawl",
+        "ranked_doc_ids": [
+          "doc-crawl",
+          "doc-random-b",
+          "doc-random-a",
+          "doc-random-c",
+          "doc-random-d"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 7938
+      },
+      {
+        "query": "SSRF protection rejects localhost private IP link-local URL",
+        "relevant_doc": "doc-ssrf",
+        "ranked_doc_ids": [
+          "doc-ssrf",
+          "doc-random-c",
+          "doc-random-a",
+          "doc-random-d",
+          "doc-random-b"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 321
+      },
+      {
+        "query": "Chinese-CLIP image text matching coarse ranking",
+        "relevant_doc": "doc-clip",
+        "ranked_doc_ids": [
+          "doc-clip",
+          "doc-random-a",
+          "doc-random-c",
+          "doc-random-b",
+          "doc-random-d"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 234
+      },
+      {
+        "query": "RAGAnything content_list multimodal insertion",
+        "relevant_doc": "doc-rag",
+        "ranked_doc_ids": [
+          "doc-rag",
+          "doc-random-d",
+          "doc-random-a",
+          "doc-random-b",
+          "doc-random-c"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 241
+      },
+      {
+        "query": "FastAPI unified chat query route",
+        "relevant_doc": "doc-api",
+        "ranked_doc_ids": [
+          "doc-api",
+          "doc-random-b",
+          "doc-random-c",
+          "doc-random-a",
+          "doc-random-d"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 237
+      },
+      {
+        "query": "runtime flags fallback observability",
+        "relevant_doc": "doc-flags",
+        "ranked_doc_ids": [
+          "doc-flags",
+          "doc-random-a",
+          "doc-random-d",
+          "doc-random-b",
+          "doc-random-c"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 214
+      },
+      {
+        "query": "progress event frontend execution trace",
+        "relevant_doc": "doc-progress",
+        "ranked_doc_ids": [
+          "doc-progress",
+          "doc-random-d",
+          "doc-random-b",
+          "doc-random-a",
+          "doc-random-c"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 222
+      },
+      {
+        "query": "MemoryClient Redis MySQL hybrid preferences",
+        "relevant_doc": "doc-memory",
+        "ranked_doc_ids": [
+          "doc-memory",
+          "doc-random-a",
+          "doc-random-c",
+          "doc-random-d",
+          "doc-random-b"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 222
+      },
+      {
+        "query": "image pipeline reachable cache local_path",
+        "relevant_doc": "doc-cache",
+        "ranked_doc_ids": [
+          "doc-cache",
+          "doc-random-a",
+          "doc-random-b",
+          "doc-random-c",
+          "doc-random-d"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 216
+      },
+      {
+        "query": "VLM strict spatial left right filter",
+        "relevant_doc": "doc-vlm",
+        "ranked_doc_ids": [
+          "doc-vlm",
+          "doc-random-a",
+          "doc-random-d",
+          "doc-random-b",
+          "doc-random-c"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 217
+      },
+      {
+        "query": "query planner one LLM call intent rewrite constraints",
+        "relevant_doc": "doc-planner",
+        "ranked_doc_ids": [
+          "doc-planner",
+          "doc-random-d",
+          "doc-random-a",
+          "doc-random-c",
+          "doc-random-b"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 272
+      },
+      {
+        "query": "general qa body rerank evidence quality",
+        "relevant_doc": "doc-rerank",
+        "ranked_doc_ids": [
+          "doc-rerank",
+          "doc-random-d",
+          "doc-random-c",
+          "doc-random-b",
+          "doc-random-a"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 205
+      },
+      {
+        "query": "DuckDuckGo HTML search fallback",
+        "relevant_doc": "doc-search",
+        "ranked_doc_ids": [
+          "doc-search",
+          "doc-random-c",
+          "doc-random-a",
+          "doc-random-b",
+          "doc-random-d"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 220
+      },
+      {
+        "query": "image search skips normal rag ingest",
+        "relevant_doc": "doc-img-ingest",
+        "ranked_doc_ids": [
+          "doc-img-ingest",
+          "doc-random-c",
+          "doc-random-b",
+          "doc-random-d",
+          "doc-random-a"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 236
+      },
+      {
+        "query": "RAG local fallback bounded store",
+        "relevant_doc": "doc-local-rag",
+        "ranked_doc_ids": [
+          "doc-local-rag",
+          "doc-random-a",
+          "doc-random-b",
+          "doc-random-d",
+          "doc-random-c"
+        ],
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 221
+      }
+    ],
+    "summary": {
+      "count": 15,
+      "top1_accuracy": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "latency": {
+        "count": 15,
+        "avg_ms": 747.73,
+        "p50_ms": 222,
+        "p95_ms": 7938,
+        "max_ms": 7938
+      }
+    }
+  },
+  "image_answer_quality": {
+    "dataset": "15 synthetic MME-style perception/spatial yes-no and short-answer samples generated locally.",
+    "reference_notes": [
+      "MME evaluates multimodal models across perception and cognition subtasks; this project uses a lightweight perception/spatial subset for thesis-scale evaluation."
+    ],
+    "vlm_credentials_configured": true,
+    "vlm_model": "qwen3.5-omni-plus-2026-03-15",
+    "cases": [
+      {
+        "case_id": "I01",
+        "question": "这张图主要是什么颜色？只回答红色或绿色或蓝色。",
+        "expected_answer": "红色",
+        "image_kind": "red square",
+        "status_code": 200,
+        "latency_ms": 9147,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I02",
+        "question": "这张图主要是什么颜色？只回答红色或绿色或蓝色。",
+        "expected_answer": "绿色",
+        "image_kind": "green square",
+        "status_code": 200,
+        "latency_ms": 2522,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I03",
+        "question": "这张图主要是什么颜色？只回答红色或绿色或蓝色。",
+        "expected_answer": "蓝色",
+        "image_kind": "blue square",
+        "status_code": 200,
+        "latency_ms": 399,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I04",
+        "question": "图中是否有圆形？回答是或否。",
+        "expected_answer": "是",
+        "image_kind": "circle",
+        "status_code": 200,
+        "latency_ms": 403,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I05",
+        "question": "图中是否有三角形？回答是或否。",
+        "expected_answer": "是",
+        "image_kind": "triangle",
+        "status_code": 200,
+        "latency_ms": 380,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I06",
+        "question": "图中是否有正方形？回答是或否。",
+        "expected_answer": "是",
+        "image_kind": "square",
+        "status_code": 200,
+        "latency_ms": 460,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I07",
+        "question": "黑色圆点在左边还是右边？",
+        "expected_answer": "左",
+        "image_kind": "dot_left",
+        "status_code": 200,
+        "latency_ms": 674,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I08",
+        "question": "黑色圆点在左边还是右边？",
+        "expected_answer": "右",
+        "image_kind": "dot_right",
+        "status_code": 200,
+        "latency_ms": 770,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I09",
+        "question": "图中有几个黑色圆点？只回答数字。",
+        "expected_answer": "2",
+        "image_kind": "two_dots",
+        "status_code": 200,
+        "latency_ms": 489,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I10",
+        "question": "图中有几个黑色圆点？只回答数字。",
+        "expected_answer": "3",
+        "image_kind": "three_dots",
+        "status_code": 200,
+        "latency_ms": 458,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I11",
+        "question": "字母 A 在图中吗？回答是或否。",
+        "expected_answer": "是",
+        "image_kind": "letter_a",
+        "status_code": 200,
+        "latency_ms": 427,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I12",
+        "question": "字母 B 在图中吗？回答是或否。",
+        "expected_answer": "是",
+        "image_kind": "letter_b",
+        "status_code": 200,
+        "latency_ms": 518,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I13",
+        "question": "红色方块在蓝色方块左边吗？回答是或否。",
+        "expected_answer": "是",
+        "image_kind": "red_left_blue",
+        "status_code": 200,
+        "latency_ms": 673,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I14",
+        "question": "红色方块在蓝色方块右边吗？回答是或否。",
+        "expected_answer": "否",
+        "image_kind": "red_left_blue",
+        "status_code": 200,
+        "latency_ms": 744,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      },
+      {
+        "case_id": "I15",
+        "question": "图中是否同时有红色和蓝色？回答是或否。",
+        "expected_answer": "是",
+        "image_kind": "red_left_blue",
+        "status_code": 200,
+        "latency_ms": 507,
+        "returned_images": 1,
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "answer_correct": false
+      }
+    ],
+    "summary": {
+      "count": 15,
+      "success_status_rate": 1.0,
+      "answer_correct_rate": 0.0,
+      "avg_returned_images": 1,
+      "latency": {
+        "count": 15,
+        "avg_ms": 1238.07,
+        "p50_ms": 507,
+        "p95_ms": 9147,
+        "max_ms": 9147
+      }
+    }
+  },
+  "comparative_analysis": {
+    "type": "qualitative capability comparison",
+    "systems": [
+      {
+        "system": "通用纯 LLM 问答",
+        "web_qa": "依赖模型参数知识，不保证当前网页证据",
+        "image_search": "通常不负责开放域图片召回和可达性缓存",
+        "multimodal_rag": "无外部证据入库链路",
+        "observability": "通常无请求级 runtime_flags/progress",
+        "score": 1
+      },
+      {
+        "system": "LangChain/LlamaIndex 典型文本 RAG",
+        "web_qa": "可构建文本文档 RAG",
+        "image_search": "默认不提供文搜图、CLIP/VLM 空间约束过滤",
+        "multimodal_rag": "需额外集成多模态处理器",
+        "observability": "框架有 tracing 能力，但需应用自行设计业务 flags",
+        "score": 3
+      },
+      {
+        "system": "Crawl4AI 单独使用",
+        "web_qa": "强于网页采集和 Markdown/结构化提取",
+        "image_search": "不负责图片语义检索和最终 VLM 回答",
+        "multimodal_rag": "不负责 RAG 入库与问答生成",
+        "observability": "有采集日志，缺少完整问答链路观测",
+        "score": 2
+      },
+      {
+        "system": "RAGAnything 单独使用",
+        "web_qa": "具备多模态 RAG 能力，但需上游网页采集和证据适配",
+        "image_search": "不等同于开放域文搜图搜索引擎与可达性缓存管线",
+        "multimodal_rag": "强",
+        "observability": "不直接覆盖本项目 API 级 progress/runtime_flags",
+        "score": 4
+      },
+      {
+        "system": "本系统",
+        "web_qa": "Search/Crawl4AI/rerank/RAGAnything Bridge 串联",
+        "image_search": "开放域图片召回、可达性缓存、Chinese-CLIP、VLM 回答",
+        "multimodal_rag": "通过 Bridge 将网页证据适配为多模态入库格式",
+        "observability": "runtime_flags、metrics、progress 同时覆盖",
+        "score": 5
+      }
+    ],
+    "conclusion": "本系统的优势不在单点模型指标，而在把网页采集、多模态证据适配、文搜图、VLM 回答、安全过滤和可观测性组合为可运行闭环。"
+  },
+  "frontend_screenshots": {
+    "general_qa": "D:\\multimodal-rag-agent\\docs\\architecture\\assets\\chapter5\\chapter5_frontend_general_qa.png",
+    "image_search": "D:\\multimodal-rag-agent\\docs\\architecture\\assets\\chapter5\\chapter5_frontend_image_search.png"
+  }
+}

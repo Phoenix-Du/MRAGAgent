@@ -1,0 +1,664 @@
+{
+  "generated_at": "2026-05-07 22:05:25",
+  "hotpot_answer_quality": {
+    "dataset": "HotpotQA dev distractor 抽样 15 条非 yes/no 问答",
+    "rows": [
+      {
+        "case_id": "H01",
+        "question": "What government position was held by the woman who portrayed Corliss Archer in the film Kiss and Tell?",
+        "gold_answer": "Chief of Protocol",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.0,
+        "evidence_count": 3,
+        "latency_ms": 12998,
+        "answer_preview": "在电影《Kiss and Tell》中饰演科莉丝·阿彻（Corliss Archer）的女性是莎莉·安妮·伯克（Sally Ann Howes），但证据材料中**未提及此人及其政府职务**。  证据中仅明确： - 证据3指出，珍妮特·沃尔多（Janet Waldo）在广播剧《Meet Corliss Archer》中为科莉丝·阿彻配音； - 证据2提到秀兰·邓波儿（Shirley Temple）担任过美国驻加纳大使、驻捷克斯洛伐克大使及"
+      },
+      {
+        "case_id": "H02",
+        "question": "What science fantasy young adult series, told in first person, has a set of companion books narrating the stories of enslaved worlds and alien species?",
+        "gold_answer": "Animorphs",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.0,
+        "evidence_count": 3,
+        "latency_ms": 5039,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. The series consists of 40 short novels aimed primarily at the young adult market based on the adult series Left Behind also written by Jerry B. Like the adult series, the books were published by Tynda"
+      },
+      {
+        "case_id": "H03",
+        "question": "The director of the romantic comedy \"Big Stone Gap\" is based in what New York city?",
+        "gold_answer": "Greenwich Village, New York City",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.041,
+        "evidence_count": 3,
+        "latency_ms": 241,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. In New York City, the Great Eastern shows filled the gap between the mid-1980s demise of the annual Comic Art Convention and Creation Conventions, and the establishment of promoter Michael Carbonaro's"
+      },
+      {
+        "case_id": "H04",
+        "question": "2014 S/S is the debut album of a South Korean boy group that was formed by who?",
+        "gold_answer": "YG Entertainment",
+        "status_code": 200,
+        "answer_hit": true,
+        "token_f1": 0.027,
+        "evidence_count": 3,
+        "latency_ms": 254,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. Winner (Hangul: 위너), often stylized as WINNER, is a South Korean boy group formed in 2013 by YG Entertainment and debuted in 2014. Originally a five-piece group with Taehyun, who later departed from t"
+      },
+      {
+        "case_id": "H05",
+        "question": "Who was known by his stage name Aladin and helped organizations improve their performance as a consultant?",
+        "gold_answer": "Eenasul Fateh",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.0,
+        "evidence_count": 3,
+        "latency_ms": 249,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. Mick Batyske (known by his stage name Mick, sometimes styled as MICK, and formerly Mick Boogie) is an American DJ and entrepreneur. In addition to his mix tape releases, he has performed in venues int"
+      },
+      {
+        "case_id": "H06",
+        "question": "The arena where the Lewiston Maineiacs played their home games can seat how many people?",
+        "gold_answer": "3,677 seated",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.014,
+        "evidence_count": 3,
+        "latency_ms": 231,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. Basketball games are also played in Agganis Arena, and on occasion Walter Brown Arena. When Boston University left the America East Conference for the Patriot League in July 2013, they announced that "
+      },
+      {
+        "case_id": "H07",
+        "question": "Who is older, Annie Morton or Terry Richardson?",
+        "gold_answer": "Terry Richardson",
+        "status_code": 200,
+        "answer_hit": true,
+        "token_f1": 0.25,
+        "evidence_count": 3,
+        "latency_ms": 2402,
+        "answer_preview": "安妮·莫顿（Annie Morton）出生于1970年10月8日，特里·理查森（Terry Richardson）出生于1965年8月14日。   因此，特里·理查森比安妮·莫顿年长。"
+      },
+      {
+        "case_id": "H08",
+        "question": "What is the name of the fight song of the university whose main campus is in Lawrence, Kansas and whose branch campuses are in the Kansas City metropolitan area?",
+        "gold_answer": "Kansas Song",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.034,
+        "evidence_count": 3,
+        "latency_ms": 268,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. (We’re From Kansas) is a fight song of the University of Kansas. 2. North Kansas City is a city in Clay County, Missouri, United States that despite the similarity in name to its larger counterpart, K"
+      },
+      {
+        "case_id": "H09",
+        "question": "What screenwriter with credits for \"Evolution\" co-wrote a film starring Nicolas Cage and Téa Leoni?",
+        "gold_answer": "David Weissman",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.0,
+        "evidence_count": 3,
+        "latency_ms": 259,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. The film stars Michael Biehn, Nicolas Cage, Charlie Sheen, James Coburn, and Peter Fonda. A prequel/sequel, \"Arsenal\", starring Nicolas Cage as his character Eddie King, was released in 2017. 2. The s"
+      },
+      {
+        "case_id": "H10",
+        "question": "What year did Guns N Roses perform a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective?",
+        "gold_answer": "1999",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.0,
+        "evidence_count": 3,
+        "latency_ms": 5067,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. Faction With Jason Ellis is an uncensored hard rock, punk, hip hop, and heavy metal music mixed channel on Siruis XM Satellite Radio. In mid-July 2017, Faction was temporarily replaced by Guns N Roses"
+      },
+      {
+        "case_id": "H11",
+        "question": "The football manager who recruited David Beckham managed Manchester United during what timeframe?",
+        "gold_answer": "from 1986 to 2013",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.0,
+        "evidence_count": 3,
+        "latency_ms": 6158,
+        "answer_preview": "大卫·贝克汉姆效力于曼联期间，其主教练是亚历克斯·弗格森爵士（Alex Ferguson），但该信息未在提供的证据中出现。  证据中未提及招募大卫·贝克汉姆的教练姓名，也未说明该教练执教曼联的具体时间段。   证据2仅表明贝克汉姆1996年代表曼联出战慈善盾杯，证据3提到马特·巴斯比（Matt Busby）执教曼联时间为1945至1969年，但此人早于贝克汉姆时代；其他证据涉及帕尔比、曼格纳尔等教练，均与贝克汉姆无关。  因此，关于“招"
+      },
+      {
+        "case_id": "H12",
+        "question": "Brown State Fishing Lake is in a country that has a population of how many inhabitants ?",
+        "gold_answer": "9,984",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.0,
+        "evidence_count": 3,
+        "latency_ms": 445,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. It contains a series of recreational facilities and a variety of lakes within its boundaries. These include the Gem Lakes, Lower Fishing Lake, Upper Fishing Lake and others. 2. is a lake in the Canadi"
+      },
+      {
+        "case_id": "H13",
+        "question": "The Vermont Catamounts men's soccer team currently competes in a conference that was formerly known as what from 1988 to 1996?",
+        "gold_answer": "the North Atlantic Conference",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.016,
+        "evidence_count": 3,
+        "latency_ms": 433,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. The Vermont Catamounts men's soccer team represents the University of Vermont in all NCAA Division I men's college soccer competitions. The team competes in the America East Conference. 2. The 2010–11"
+      },
+      {
+        "case_id": "H14",
+        "question": "Roger O. Egeberg was Assistant Secretary for Health and Scientific Affairs during the administration of a president that served during what years?",
+        "gold_answer": "1969 until 1974",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.0,
+        "evidence_count": 3,
+        "latency_ms": 379,
+        "answer_preview": "根据当前证据，可以得到以下结论： 1. is an American government official who currently serves as Assistant Secretary of Defense for Legislative Affairs. Past roles with the federal government include a role at the White House as Special A"
+      },
+      {
+        "case_id": "H15",
+        "question": "Which writer was from England, Henry Roth or Robert Erskine Childers?",
+        "gold_answer": "Robert Erskine Childers DSC",
+        "status_code": 200,
+        "answer_hit": false,
+        "token_f1": 0.2,
+        "evidence_count": 3,
+        "latency_ms": 2704,
+        "answer_preview": "罗伯特·厄斯金·柴德斯（Robert Erskine Childers）来自英格兰。   证据明确指出他是“English-born writer”（出生于英格兰的作家），并长期在爱尔兰从事民族主义活动。  亨利·罗斯（Henry Roth）是美国人。   证据明确说明他是“American novelist and short story writer”（美国小说家和短篇小说作家）。"
+      }
+    ],
+    "summary": {
+      "count": 15,
+      "success_rate": 1.0,
+      "answer_hit_rate": 0.133,
+      "avg_token_f1": 0.039,
+      "avg_evidence_count": 3,
+      "latency": {
+        "avg_ms": 2475.13,
+        "p50_ms": 433,
+        "p95_ms": 12998
+      }
+    }
+  },
+  "beir_retrieval_quality": {
+    "dataset": "BEIR SciFact test 抽样 15 条查询；每条使用 1 个相关文档 + 9 个干扰文档做候选重排",
+    "rows": [
+      {
+        "case_id": "B01",
+        "query_id": "1",
+        "query": "0-dimensional biomaterials show inductive properties.",
+        "relevant_doc": "31715818",
+        "relevant_rank": 5,
+        "top1_hit": false,
+        "mrr": 0.2,
+        "ndcg_at_3": 0.0,
+        "latency_ms": 32954
+      },
+      {
+        "case_id": "B02",
+        "query_id": "3",
+        "query": "1,000 genomes project enables mapping of genetic sequence variation consisting of rare variants with larger penetrance effects than common variants.",
+        "relevant_doc": "14717500",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1744
+      },
+      {
+        "case_id": "B03",
+        "query_id": "5",
+        "query": "1/2000 in UK have abnormal PrP positivity.",
+        "relevant_doc": "13734012",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1631
+      },
+      {
+        "case_id": "B04",
+        "query_id": "13",
+        "query": "5% of perinatal mortality is due to low birth weight.",
+        "relevant_doc": "1606628",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1670
+      },
+      {
+        "case_id": "B05",
+        "query_id": "36",
+        "query": "A deficiency of vitamin B12 increases blood levels of homocysteine.",
+        "relevant_doc": "5152028",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1752
+      },
+      {
+        "case_id": "B06",
+        "query_id": "42",
+        "query": "A high microerythrocyte count raises vulnerability to severe anemia in homozygous alpha (+)- thalassemia trait subjects.",
+        "relevant_doc": "18174210",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1825
+      },
+      {
+        "case_id": "B07",
+        "query_id": "48",
+        "query": "A total of 1,000 people in the UK are asymptomatic carriers of vCJD infection.",
+        "relevant_doc": "13734012",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1764
+      },
+      {
+        "case_id": "B08",
+        "query_id": "49",
+        "query": "ADAR1 binds to Dicer to cleave pre-miRNA.",
+        "relevant_doc": "5953485",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1759
+      },
+      {
+        "case_id": "B09",
+        "query_id": "50",
+        "query": "AIRE is expressed in some skin tumors.",
+        "relevant_doc": "12580014",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1792
+      },
+      {
+        "case_id": "B10",
+        "query_id": "51",
+        "query": "ALDH1 expression is associated with better breast cancer outcomes.",
+        "relevant_doc": "45638119",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1808
+      },
+      {
+        "case_id": "B11",
+        "query_id": "53",
+        "query": "ALDH1 expression is associated with poorer prognosis in breast cancer.",
+        "relevant_doc": "45638119",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1645
+      },
+      {
+        "case_id": "B12",
+        "query_id": "54",
+        "query": "AMP-activated protein kinase (AMPK) activation increases inflammation-related fibrosis in the lungs.",
+        "relevant_doc": "49556906",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1763
+      },
+      {
+        "case_id": "B13",
+        "query_id": "56",
+        "query": "APOE4 expression in iPSC-derived neurons increases AlphaBeta production and tau phosphorylation causing GABA neuron degeneration.",
+        "relevant_doc": "4709641",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 2162
+      },
+      {
+        "case_id": "B14",
+        "query_id": "57",
+        "query": "APOE4 expression in iPSC-derived neurons increases AlphaBeta production and tau phosphorylation, delaying GABA neuron degeneration.",
+        "relevant_doc": "4709641",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1983
+      },
+      {
+        "case_id": "B15",
+        "query_id": "70",
+        "query": "Activation of PPM1D suppresses p53 function.",
+        "relevant_doc": "5956380",
+        "relevant_rank": 1,
+        "top1_hit": true,
+        "mrr": 1.0,
+        "ndcg_at_3": 1.0,
+        "latency_ms": 1829
+      }
+    ],
+    "summary": {
+      "count": 15,
+      "top1_accuracy": 0.933,
+      "mrr": 0.947,
+      "ndcg_at_3": 0.933,
+      "latency": {
+        "avg_ms": 3872.07,
+        "p50_ms": 1764,
+        "p95_ms": 32954
+      }
+    }
+  },
+  "mme_image_answer_quality": {
+    "dataset": "MME subset-300 英文抽样 15 条 yes/no 图像问答",
+    "vlm_configured": true,
+    "vlm_model": "qwen3.5-omni-plus-2026-03-15",
+    "rows": [
+      {
+        "case_id": "M01",
+        "category": "OCR",
+        "question": "Is the phone number in the picture \"0131 555 6363\"? Please answer yes or no.",
+        "gold_answer": "Yes",
+        "status_code": 200,
+        "answer_hit": true,
+        "returned_images": 1,
+        "latency_ms": 43723,
+        "answer_preview": "Yes",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_fallback"
+        ]
+      },
+      {
+        "case_id": "M02",
+        "category": "OCR",
+        "question": "Is the phone number in the picture \"0137 556 6363\"? Please answer yes or no.",
+        "gold_answer": "No",
+        "status_code": 200,
+        "answer_hit": false,
+        "returned_images": 1,
+        "latency_ms": 104809,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ]
+      },
+      {
+        "case_id": "M03",
+        "category": "OCR",
+        "question": "Is the word in the picture \"seabreeze motel\"? Please answer yes or no.",
+        "gold_answer": "Yes",
+        "status_code": 200,
+        "answer_hit": true,
+        "returned_images": 1,
+        "latency_ms": 67684,
+        "answer_preview": "Yes",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ]
+      },
+      {
+        "case_id": "M04",
+        "category": "OCR",
+        "question": "Is the word in the picture \"seebreeze model\"? Please answer yes or no.",
+        "gold_answer": "No",
+        "status_code": 200,
+        "answer_hit": true,
+        "returned_images": 1,
+        "latency_ms": 33064,
+        "answer_preview": "No",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_fallback"
+        ]
+      },
+      {
+        "case_id": "M05",
+        "category": "OCR",
+        "question": "Is the word in the logo \"hardco industrial construction\"? Please answer yes or no.",
+        "gold_answer": "Yes",
+        "status_code": 200,
+        "answer_hit": false,
+        "returned_images": 1,
+        "latency_ms": 1100,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ]
+      },
+      {
+        "case_id": "M06",
+        "category": "OCR",
+        "question": "Is the word in the logo \"hardto industal construction\"? Please answer yes or no.",
+        "gold_answer": "No",
+        "status_code": 200,
+        "answer_hit": true,
+        "returned_images": 1,
+        "latency_ms": 99220,
+        "answer_preview": "No",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_fallback"
+        ]
+      },
+      {
+        "case_id": "M07",
+        "category": "artwork",
+        "question": "Does this artwork belong to the type of religious? Please answer yes or no.",
+        "gold_answer": "Yes",
+        "status_code": 200,
+        "answer_hit": true,
+        "returned_images": 1,
+        "latency_ms": 66866,
+        "answer_preview": "Yes",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ]
+      },
+      {
+        "case_id": "M08",
+        "category": "artwork",
+        "question": "Does this artwork belong to the type of study? Please answer yes or no.",
+        "gold_answer": "No",
+        "status_code": 200,
+        "answer_hit": true,
+        "returned_images": 1,
+        "latency_ms": 40861,
+        "answer_preview": "No",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ]
+      },
+      {
+        "case_id": "M09",
+        "category": "artwork",
+        "question": "Does this artwork exist in the form of architecture? Please answer yes or no.",
+        "gold_answer": "Yes",
+        "status_code": 200,
+        "answer_hit": false,
+        "returned_images": 1,
+        "latency_ms": 1135,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ]
+      },
+      {
+        "case_id": "M10",
+        "category": "artwork",
+        "question": "Does this artwork exist in the form of metalwork? Please answer yes or no.",
+        "gold_answer": "No",
+        "status_code": 200,
+        "answer_hit": true,
+        "returned_images": 1,
+        "latency_ms": 100736,
+        "answer_preview": "No",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_fallback"
+        ]
+      },
+      {
+        "case_id": "M11",
+        "category": "artwork",
+        "question": "Is this artwork displayed in palazzo medici riccardi, florence? Please answer yes or no.",
+        "gold_answer": "Yes",
+        "status_code": 200,
+        "answer_hit": false,
+        "returned_images": 1,
+        "latency_ms": 95393,
+        "answer_preview": "No",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ]
+      },
+      {
+        "case_id": "M12",
+        "category": "artwork",
+        "question": "Is this artwork displayed in abbey church of sainte-foy, conques (aveyron)? Please answer yes or no.",
+        "gold_answer": "No",
+        "status_code": 200,
+        "answer_hit": true,
+        "returned_images": 1,
+        "latency_ms": 93472,
+        "answer_preview": "No",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined"
+        ]
+      },
+      {
+        "case_id": "M13",
+        "category": "artwork",
+        "question": "Is this artwork created by giorgione? Please answer yes or no.",
+        "gold_answer": "Yes",
+        "status_code": 200,
+        "answer_hit": false,
+        "returned_images": 1,
+        "latency_ms": 36135,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ]
+      },
+      {
+        "case_id": "M14",
+        "category": "artwork",
+        "question": "Is this artwork created by marilhat, prosper? Please answer yes or no.",
+        "gold_answer": "No",
+        "status_code": 200,
+        "answer_hit": true,
+        "returned_images": 1,
+        "latency_ms": 97594,
+        "answer_preview": "No",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ]
+      },
+      {
+        "case_id": "M15",
+        "category": "artwork",
+        "question": "Is this artwork displayed in private collection? Please answer yes or no.",
+        "gold_answer": "Yes",
+        "status_code": 200,
+        "answer_hit": false,
+        "returned_images": 1,
+        "latency_ms": 31382,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_query_heuristic_parser",
+          "image_query_rewritten",
+          "image_search_ingest_skipped",
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ]
+      }
+    ],
+    "summary": {
+      "count": 15,
+      "success_rate": 1.0,
+      "answer_hit_rate": 0.6,
+      "avg_returned_images": 1,
+      "latency": {
+        "avg_ms": 60878.27,
+        "p50_ms": 66866,
+        "p95_ms": 104809
+      }
+    }
+  }
+}

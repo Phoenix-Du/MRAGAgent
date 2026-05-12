@@ -1,0 +1,558 @@
+{
+  "generated_at": "2026-05-07 22:49:56",
+  "asgi_overhead_benchmark": [
+    {
+      "concurrency": 1,
+      "requests": 20,
+      "success": 20,
+      "throughput_qps": 473.14,
+      "avg_latency_ms": 2.1,
+      "p95_latency_ms": 1
+    },
+    {
+      "concurrency": 5,
+      "requests": 50,
+      "success": 50,
+      "throughput_qps": 1243.0,
+      "avg_latency_ms": 0.72,
+      "p95_latency_ms": 2
+    },
+    {
+      "concurrency": 10,
+      "requests": 80,
+      "success": 80,
+      "throughput_qps": 1479.9,
+      "avg_latency_ms": 0.66,
+      "p95_latency_ms": 1
+    }
+  ],
+  "websrc_parse_quality": {
+    "dataset": "WebSRC v1.0 test 抽样 15 个网页结构问答页面",
+    "rows": [
+      {
+        "case_id": "W01",
+        "domain": "auto",
+        "page_id": "0200001",
+        "question": "Specify the recommanded price for 2020 Acura ILX Sedan?",
+        "answer": "$25900",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W02",
+        "domain": "game",
+        "page_id": "0800123",
+        "question": "When was the last update of this app?",
+        "answer": "October 19, 2020",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 0,
+        "link_count": 0,
+        "layout_boxes": 84,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W03",
+        "domain": "movie",
+        "page_id": "0800005",
+        "question": "What genre is this movie?",
+        "answer": "Adventure , Fantasy , Action",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 0,
+        "link_count": 0,
+        "layout_boxes": 88,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W04",
+        "domain": "sports",
+        "page_id": "1600001",
+        "question": "How many GP did this player have in BOS when 2016-17?",
+        "answer": "78",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 175,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W05",
+        "domain": "university",
+        "page_id": "0800029",
+        "question": "How long will it take me to finish at Virginia Tech?",
+        "answer": "4 Year",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 0,
+        "link_count": 0,
+        "layout_boxes": 92,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W06",
+        "domain": "hotel",
+        "page_id": "0700001",
+        "question": "What the price of a Room, 1 King Bed, Accessible, Non Smoking?",
+        "answer": "$139",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 0,
+        "link_count": 0,
+        "layout_boxes": 106,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W07",
+        "domain": "auto",
+        "page_id": "0200002",
+        "question": "What's the recommanded price for 2020 Acura MDX FWD 7-Passenger?",
+        "answer": "$44500",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W08",
+        "domain": "auto",
+        "page_id": "0200003",
+        "question": "What's the 2021 Toyota GR Supra 3.0 Premium Auto (Natl)'s recommandation price?",
+        "answer": "$54490",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W09",
+        "domain": "auto",
+        "page_id": "0200004",
+        "question": "What is MSRP for the 2021 Acura RDX FWD?",
+        "answer": "$38200",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W10",
+        "domain": "auto",
+        "page_id": "0200005",
+        "question": "How much should I charge for the 2020 Nissan Sentra S CVT?",
+        "answer": "$19310",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W11",
+        "domain": "auto",
+        "page_id": "0200006",
+        "question": "How much should I charge for the 2021 Acura TLX FWD?",
+        "answer": "$37500",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W12",
+        "domain": "auto",
+        "page_id": "0200008",
+        "question": "What is the average price for the 2021 Alfa Romeo Giulia RWD?",
+        "answer": "$39450",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W13",
+        "domain": "auto",
+        "page_id": "0200009",
+        "question": "Specify the recommanded price for 2021 Alfa Romeo Stelvio RWD?",
+        "answer": "$41450",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W14",
+        "domain": "auto",
+        "page_id": "0200010",
+        "question": "How much should I charge for the 2020 Mercedes-Benz A 220 A 220 Sedan?",
+        "answer": "$32800",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      },
+      {
+        "case_id": "W15",
+        "domain": "auto",
+        "page_id": "0200011",
+        "question": "Specify the recommanded price for 2020 Mercedes-Benz A 220 A 220 Sedan?",
+        "answer": "$32800",
+        "baseline_answer_coverage": true,
+        "integrated_answer_coverage": true,
+        "gold_multimodal_or_layout": true,
+        "modal_count": 0,
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 0,
+        "layout_boxes": 89,
+        "source_doc_valid": true
+      }
+    ],
+    "summary": {
+      "count": 15,
+      "baseline_answer_coverage": 1.0,
+      "integrated_answer_coverage": 1.0,
+      "source_doc_valid_rate": 1.0,
+      "multimodal_or_layout_preservation": 1.0,
+      "avg_modal_elements": 0,
+      "avg_links": 0,
+      "avg_layout_boxes": 95.67
+    }
+  },
+  "image_candidate_selection": {
+    "dataset": "Flickr8k test 抽样 15 条 caption；每条构造 1 张目标图 + 4 张干扰图",
+    "vlm_configured": true,
+    "vlm_model": "qwen3.5-omni-plus-2026-03-15",
+    "rows": [
+      {
+        "case_id": "I01",
+        "query": "The dogs are in the snow in front of a fence .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": false,
+        "selected_gold": true,
+        "selected_row_index": 0,
+        "returned_images": 1,
+        "latency_ms": 5607,
+        "answer_preview": "The image shows two dogs playing in the snow with a fence visible in the background.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I02",
+        "query": "a brown and white dog swimming towards some in the pool",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": false,
+        "selected_gold": true,
+        "selected_row_index": 1,
+        "returned_images": 1,
+        "latency_ms": 7058,
+        "answer_preview": "The image shows a brown and white dog swimming in a blue pool towards a person sitting at the edge.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I03",
+        "query": "A man and a woman in festive costumes dancing .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": true,
+        "selected_gold": true,
+        "selected_row_index": 2,
+        "returned_images": 1,
+        "latency_ms": 5535,
+        "answer_preview": "The image shows a man and a woman dressed in colorful festive costumes dancing together.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I04",
+        "query": "A couple of people sit outdoors at a table with an umbrella and talk .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": false,
+        "selected_gold": false,
+        "selected_row_index": 639,
+        "returned_images": 1,
+        "latency_ms": 573,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I05",
+        "query": "A man is wearing a Sooners red football shirt and helmet .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": true,
+        "selected_gold": true,
+        "selected_row_index": 4,
+        "returned_images": 1,
+        "latency_ms": 477,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I06",
+        "query": "A brown dog running",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": true,
+        "selected_gold": true,
+        "selected_row_index": 5,
+        "returned_images": 1,
+        "latency_ms": 3112,
+        "answer_preview": "The image shows a brown dog running across a grassy area, with its legs extended mid-stride and tail raised, matching the caption 'A brown dog running'.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I07",
+        "query": "A girl with dark brown hair and eyes in a blue scarf is standing next to a girl in a fur edged coat .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": false,
+        "selected_gold": true,
+        "selected_row_index": 6,
+        "returned_images": 1,
+        "latency_ms": 2732,
+        "answer_preview": "图片中展示了两个女孩，其中一个有着深棕色的头发和眼睛，戴着蓝色围巾，她正站在另一个穿着带毛边外套的女孩旁边。",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I08",
+        "query": "A dog with its mouth opened .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": false,
+        "selected_gold": false,
+        "selected_row_index": 458,
+        "returned_images": 1,
+        "latency_ms": 3426,
+        "answer_preview": "图片不足以回答该问题。  图中显示的是两名男性拳击手在拳击台上比赛，并没有狗。因此，没有任何一张候选图匹配“一只张着嘴的狗”这个描述。",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I09",
+        "query": "A black dog emerges from the water onto the sand , holding a white object in its mouth .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": false,
+        "selected_gold": true,
+        "selected_row_index": 8,
+        "returned_images": 1,
+        "latency_ms": 6222,
+        "answer_preview": "The image shows a wet black dog walking out of the water onto a sandy shore, holding a white ball in its mouth.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I10",
+        "query": "A player from the white and green highschool team dribbles down court defended by a player from the other team .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": true,
+        "selected_gold": true,
+        "selected_row_index": 9,
+        "returned_images": 1,
+        "latency_ms": 2920,
+        "answer_preview": "A player from the white and green high school team dribbles down court defended by a player from the other team.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I11",
+        "query": "A group of tourists stand around as a lady puts her hand near the mouth of a statue .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": false,
+        "selected_gold": false,
+        "selected_row_index": 182,
+        "returned_images": 1,
+        "latency_ms": 5134,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I12",
+        "query": "A man in yellow grimaces .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": true,
+        "selected_gold": true,
+        "selected_row_index": 11,
+        "returned_images": 1,
+        "latency_ms": 3042,
+        "answer_preview": "A man wearing a yellow shirt is making a grimacing expression.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I13",
+        "query": "A dog lays on a mattress on the porch .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": true,
+        "selected_gold": true,
+        "selected_row_index": 12,
+        "returned_images": 1,
+        "latency_ms": 7177,
+        "answer_preview": "The image shows a spotted dog lying on its back on a striped mattress placed on a porch with white railings.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I14",
+        "query": "A man is standing on a sidewalk in the background with a blurry image of another man in the foreground .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": false,
+        "selected_gold": true,
+        "selected_row_index": 13,
+        "returned_images": 1,
+        "latency_ms": 5984,
+        "answer_preview": "The image shows a man standing on a sidewalk in the background, while another man appears blurry in the foreground.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I15",
+        "query": "A girl wearing a brown cap , red sneakers , and a dark green coat sits on a rock bench .",
+        "candidate_count": 5,
+        "gold_first_baseline_hit": false,
+        "selected_gold": true,
+        "selected_row_index": 14,
+        "returned_images": 1,
+        "latency_ms": 6944,
+        "answer_preview": "The image shows a girl wearing a brown cap, red sneakers, and a dark green coat sitting on a rock bench.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      }
+    ],
+    "summary": {
+      "count": 15,
+      "candidate_count": 5,
+      "random_first_baseline": 0.4,
+      "top1_accuracy": 0.8,
+      "returned_image_rate": 1.0,
+      "degraded_rate": 0.2,
+      "latency": {
+        "avg_ms": 4396.2,
+        "p50_ms": 5134,
+        "p95_ms": 7177
+      }
+    }
+  }
+}

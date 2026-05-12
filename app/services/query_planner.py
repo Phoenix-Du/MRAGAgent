@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass, field
 import json
 import logging
 from typing import Any
 
+from app.integrations.bridge_settings import bridge_settings
 from app.models.schemas import (
     ActionRelationConstraint,
+    ConstraintRelation,
     GeneralQueryConstraints,
     ImageSearchConstraints,
     IntentType,
     ObjectRelationConstraint,
+    QueryExecutionContext,
     QueryRequest,
     SpatialRelationConstraint,
 )
@@ -30,19 +34,26 @@ class QueryPlan:
     flags: list[str] = field(default_factory=list)
 
 
-async def plan_query(req: QueryRequest) -> QueryPlan | None:
+async def plan_query(
+    req: QueryRequest | QueryExecutionContext,
+    user_context: dict[str, Any] | None = None,
+) -> QueryPlan | None:
     api_key, base, model = llm_env()
     if not api_key:
         return None
 
     payload = {
         "model": model,
-        "messages": [{"role": "user", "content": _build_prompt(req)}],
+        "messages": [{"role": "user", "content": _build_prompt(req, user_context=user_context)}],
         "temperature": 0,
-        "max_tokens": 900,
+        "max_tokens": 500,
     }
     try:
-        obj = await post_llm_json(base=base, api_key=api_key, payload=payload, retries=1)
+        # Planner is on the critical path: fail fast and fallback instead of blocking for minutes.
+        obj = await asyncio.wait_for(
+            post_llm_json(base=base, api_key=api_key, payload=payload, retries=0),
+            timeout=max(3, int(bridge_settings.planner_timeout_seconds)),
+        )
     except Exception:
         logger.exception("query_planner_llm_failed")
         return None
@@ -83,32 +94,30 @@ def plan_from_obj(raw_query: str, obj: dict[str, Any]) -> QueryPlan | None:
     )
 
 
-def _build_prompt(req: QueryRequest) -> str:
+def _build_prompt(
+    req: QueryRequest | QueryExecutionContext,
+    *,
+    user_context: dict[str, Any] | None = None,
+) -> str:
     schema = {
         "intent": "general_qa | image_search",
         "confidence": "0.0-1.0",
         "search_rewrite": "string optimized for the selected retrieval pipeline",
         "entities": {},
         "general_constraints": {
-            "city": None,
+            "entities": {"location": None, "time": None, "topic": None},
             "attributes": [],
             "compare_targets": [],
             "needs_clarification": False,
             "clarification_question": None,
         },
         "image_constraints": {
-            "subjects": [],
-            "attributes": [],
-            "subject_synonyms": {},
-            "style_terms": [],
-            "exclude_terms": [],
+            "entities": {"subjects": [], "subject_synonyms": {}, "landmark": None, "time_of_day": None, "style_terms": []},
+            "visual_attributes": [],
+            "relations": [],
+            "negative_constraints": [],
             "count": None,
-            "landmark": None,
-            "time_of_day": None,
             "must_have_all_subjects": True,
-            "spatial_relations": [],
-            "action_relations": [],
-            "object_relations": [],
             "needs_clarification": False,
             "clarification_question": None,
         },
@@ -119,6 +128,7 @@ def _build_prompt(req: QueryRequest) -> str:
         "has_user_images": bool(req.images),
         "max_images": req.max_images,
         "max_web_docs": req.max_web_docs,
+        "user_context": user_context or {},
     }
     prompt = (
         "\u4f60\u662f\u591a\u6a21\u6001 RAG \u7cfb\u7edf\u7684\u7edf\u4e00 query planner\u3002"
@@ -132,6 +142,7 @@ def _build_prompt(req: QueryRequest) -> str:
         "3) \u63d0\u5230\u56fe\u7247\u4e0d\u4e00\u5b9a\u662f image_search\uff1b\u5982\u679c\u662f\u5728\u95ee\u56fe\u7247\u5185\u5bb9\u3001\u5206\u6790\u56fe\u7247\u3001\u6bd4\u8f83\u56fe\u7247\uff0c\u9009 general_qa\u3002\n"
         "4) \u53ea\u586b\u6240\u9009 intent \u5bf9\u5e94\u7684 constraints\uff0c\u53e6\u4e00\u4e2a\u53ef\u4ee5\u4e3a null \u6216\u7a7a\u5bf9\u8c61\u3002\n"
         "5) \u4e0d\u786e\u5b9a\u65f6\u9009 general_qa \u5e76\u964d\u4f4e confidence\uff1b\u7f3a\u5fc5\u8981\u6761\u4ef6\u65f6\u8bbe\u7f6e needs_clarification\u3002\n"
+        "\u7528\u6237\u4e0a\u4e0b\u6587\u53ea\u662f\u8f85\u52a9\u63d0\u793a\uff0c\u53ef\u7528\u4e8e\u8865\u5168\u5730\u70b9\u3001\u8bed\u8a00\u6216\u56de\u7b54\u504f\u597d\uff0c\u4f46\u4e0d\u8981\u8986\u76d6\u7528\u6237\u660e\u786e\u8bf7\u6c42\u3002\n"
         f"\u4e0a\u4e0b\u6587: {json.dumps(context, ensure_ascii=False)}\n"
         f"\u7528\u6237 query: {req.query}"
     )
@@ -192,41 +203,47 @@ def _image_constraints_from_obj(
     entities: dict[str, str],
 ) -> ImageSearchConstraints:
     data = obj if isinstance(obj, dict) else {}
-    spatial_relations: list[SpatialRelationConstraint] = []
+    relations: list[ConstraintRelation] = []
+    for item in data.get("relations") or []:
+        if not isinstance(item, dict):
+            continue
+        relation = str(item.get("relation") or "").strip()
+        subject = str(item.get("subject") or item.get("primary_subject") or "").strip()
+        obj_name = str(item.get("object") or item.get("secondary_subject") or "").strip()
+        rel_type = str(item.get("type") or "object").strip()
+        if rel_type not in {"spatial", "action", "object"} or not relation or not subject or not obj_name:
+            continue
+        relations.append(ConstraintRelation(type=rel_type, relation=relation, subject=subject, object=obj_name))
+
     for item in data.get("spatial_relations") or []:
         if not isinstance(item, dict):
             continue
-        try:
-            spatial_relations.append(
-                SpatialRelationConstraint(
-                    relation=str(item.get("relation") or "next_to"),
-                    primary_subject=str(item.get("primary_subject") or ""),
-                    secondary_subject=str(item.get("secondary_subject") or ""),
-                )
+        relation = str(item.get("relation") or "next_to").strip()
+        subject = str(item.get("primary_subject") or "").strip()
+        obj_name = str(item.get("secondary_subject") or "").strip()
+        if relation and subject and obj_name:
+            relations.append(
+                ConstraintRelation(type="spatial", relation=relation, subject=subject, object=obj_name)
             )
-        except Exception:
-            continue
 
-    action_relations: list[ActionRelationConstraint] = []
     for item in data.get("action_relations") or []:
         if isinstance(item, dict):
-            action_relations.append(
-                ActionRelationConstraint(
-                    subject=str(item.get("subject") or ""),
-                    verb=str(item.get("verb") or ""),
-                    object=str(item.get("object") or ""),
-                )
+            relation = str(item.get("verb") or item.get("relation") or "").strip()
+            subject = str(item.get("subject") or "").strip()
+            obj_name = str(item.get("object") or "").strip()
+            if relation and subject and obj_name:
+                relations.append(
+                    ConstraintRelation(type="action", relation=relation, subject=subject, object=obj_name)
             )
 
-    object_relations: list[ObjectRelationConstraint] = []
     for item in data.get("object_relations") or []:
         if isinstance(item, dict):
-            object_relations.append(
-                ObjectRelationConstraint(
-                    subject=str(item.get("subject") or ""),
-                    relation=str(item.get("relation") or ""),
-                    object=str(item.get("object") or ""),
-                )
+            relation = str(item.get("relation") or "").strip()
+            subject = str(item.get("subject") or "").strip()
+            obj_name = str(item.get("object") or "").strip()
+            if relation and subject and obj_name:
+                relations.append(
+                    ConstraintRelation(type="object", relation=relation, subject=subject, object=obj_name)
             )
 
     count = data.get("count") or entities.get("image_count")
@@ -234,27 +251,32 @@ def _image_constraints_from_obj(
     if count is not None:
         count = max(1, min(count, 12))
 
-    synonyms_raw = data.get("subject_synonyms")
+    entities_obj = data.get("entities") if isinstance(data.get("entities"), dict) else {}
+    synonyms_raw = data.get("subject_synonyms") or entities_obj.get("subject_synonyms")
     subject_synonyms = {
         str(k): _str_list(v)
         for k, v in synonyms_raw.items()
     } if isinstance(synonyms_raw, dict) else {}
+    subjects = _str_list(data.get("subjects") or entities_obj.get("subjects"))
+    style_terms = _str_list(data.get("style_terms") or entities_obj.get("style_terms"))
+    landmark = str(data.get("landmark") or entities_obj.get("landmark") or entities_obj.get("location") or entities.get("landmark") or "").strip() or None
+    time_of_day = str(data.get("time_of_day") or entities_obj.get("time_of_day") or entities.get("time_of_day") or "").strip() or None
 
     return ImageSearchConstraints(
         raw_query=raw_query,
         search_rewrite=search_rewrite,
-        subjects=_str_list(data.get("subjects")),
-        attributes=_str_list(data.get("attributes")),
-        subject_synonyms=subject_synonyms,
-        style_terms=_str_list(data.get("style_terms")),
-        exclude_terms=_str_list(data.get("exclude_terms")),
+        entities={
+            "subjects": subjects,
+            "subject_synonyms": subject_synonyms,
+            "landmark": landmark,
+            "time_of_day": time_of_day,
+            "style_terms": style_terms,
+        },
+        visual_attributes=_str_list(data.get("visual_attributes") or data.get("attributes")),
+        relations=relations,
+        negative_constraints=_str_list(data.get("negative_constraints") or data.get("exclude_terms")),
         count=count,
-        landmark=str(data.get("landmark") or entities.get("landmark") or "").strip() or None,
-        time_of_day=str(data.get("time_of_day") or entities.get("time_of_day") or "").strip() or None,
         must_have_all_subjects=bool(data.get("must_have_all_subjects", True)),
-        spatial_relations=spatial_relations,
-        action_relations=action_relations,
-        object_relations=object_relations,
         needs_clarification=bool(data.get("needs_clarification", False)),
         clarification_question=str(data.get("clarification_question") or "").strip() or None,
         parser_source="llm_planner",
@@ -263,10 +285,12 @@ def _image_constraints_from_obj(
 
 def _general_constraints_from_obj(raw_query: str, search_rewrite: str, obj: Any) -> GeneralQueryConstraints:
     data = obj if isinstance(obj, dict) else {}
+    entities_obj = data.get("entities") if isinstance(data.get("entities"), dict) else {}
+    location = str(entities_obj.get("location") or data.get("location") or data.get("city") or "").strip()
     return GeneralQueryConstraints(
         raw_query=raw_query,
         search_rewrite=search_rewrite,
-        city=str(data.get("city") or "").strip() or None,
+        entities={**entities_obj, "location": location or None},
         attributes=_str_list(data.get("attributes")),
         compare_targets=_str_list(data.get("compare_targets")),
         needs_clarification=bool(data.get("needs_clarification", False)),

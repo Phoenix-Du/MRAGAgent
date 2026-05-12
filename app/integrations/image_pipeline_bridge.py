@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-import json
 import io
 import logging
 import re
@@ -390,7 +389,7 @@ async def _search_unsplash_source(query: str, limit: int) -> list[ImageCandidate
 
 
 def _clip_like_filter(query: str, candidates: list[ImageCandidate], top_k: int) -> list[ImageCandidate]:
-    keep_n = _cfg_int(bridge_settings.image_clip_keep, default=top_k * 2, min_v=top_k)
+    keep_n = _cfg_int(bridge_settings.image_clip_keep, default=top_k * 4, min_v=top_k)
     min_score = _cfg_float(bridge_settings.image_clip_min_score, default=0.18)
     for c in candidates:
         c.score = _lexical_score(query, f"{c.title} {c.desc}")
@@ -490,7 +489,7 @@ async def _chinese_clip_filter(query: str, candidates: list[ImageCandidate], top
         default=min(len(candidates), top_k * 10),
         min_v=top_k,
     )
-    keep_n = _cfg_int(bridge_settings.image_clip_keep, default=top_k * 2, min_v=top_k)
+    keep_n = _cfg_int(bridge_settings.image_clip_keep, default=top_k * 4, min_v=top_k)
     min_score = _cfg_float(bridge_settings.image_clip_min_score, default=0.18)
 
     clip_download_concurrency = _cfg_int(
@@ -543,86 +542,26 @@ async def _chinese_clip_filter(query: str, candidates: list[ImageCandidate], top
         return _clip_like_filter(query, candidates, top_k=top_k)
 
 
-async def _qwen_rerank(query: str, candidates: list[ImageCandidate], top_k: int) -> list[ImageCandidate]:
-    qwen_api_key = (bridge_settings.qwen_api_key or "").strip() or (
-        bridge_settings.openai_api_key or ""
-    ).strip()
-    if not qwen_api_key:
-        return candidates[:top_k]
-
-    qwen_base_url = (
-        (bridge_settings.qwen_base_url or "").strip()
-        or (bridge_settings.openai_base_url or "").strip()
-        or "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    ).rstrip("/")
-    qwen_model = bridge_settings.qwen_model.strip()
-    endpoint = f"{qwen_base_url}/chat/completions"
-
-    enumerated = [
-        {
-            "idx": idx,
-            "title": c.title,
-            "desc": c.desc,
-            "url": c.url,
-            "source": c.source,
-            "clip_score": c.score,
-        }
-        for idx, c in enumerate(candidates)
-    ]
-    prompt = (
-        "你是图像检索精排器。给定用户查询和候选图片元数据，请按语义相关性排序并输出JSON数组。"
-        "只输出JSON，不要解释。JSON格式: [{\"idx\":int,\"score\":float}]，score范围0到1，按score降序。\n"
-        f"查询: {query}\n"
-        f"候选: {json.dumps(enumerated, ensure_ascii=False)}"
-    )
-
-    payload = {
-        "model": qwen_model,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0,
-        "max_tokens": 600,
-    }
-    headers = {"Authorization": f"Bearer {qwen_api_key}"}
-
-    try:
-        async with httpx.AsyncClient(timeout=45, headers=headers, trust_env=False) as client:
-            resp = await client.post(endpoint, json=payload)
-            resp.raise_for_status()
-            data = resp.json()
-        content = (
-            data.get("choices", [{}])[0]
-            .get("message", {})
-            .get("content", "")
-        )
-        # extract first JSON array
-        start = content.find("[")
-        end = content.rfind("]")
-        if start < 0 or end <= start:
-            return candidates[:top_k]
-        ranking_raw = json.loads(content[start : end + 1])
-        if not isinstance(ranking_raw, list):
-            return candidates[:top_k]
-        scored: list[tuple[float, ImageCandidate]] = []
-        for item in ranking_raw:
-            if not isinstance(item, dict):
-                continue
-            idx = item.get("idx")
-            score = item.get("score")
-            if not isinstance(idx, int):
-                continue
-            if idx < 0 or idx >= len(candidates):
-                continue
-            try:
-                scored.append((float(score), candidates[idx]))
-            except (TypeError, ValueError):
-                scored.append((0.0, candidates[idx]))
-        if not scored:
-            return candidates[:top_k]
-        scored.sort(key=lambda x: x[0], reverse=True)
-        ranked = [c for _, c in scored]
-        return ranked[:top_k]
-    except (httpx.HTTPError, ValueError, TypeError):
-        return candidates[:top_k]
+def _build_query_variants(query: str) -> list[str]:
+    base = " ".join(query.strip().split())
+    if not base:
+        return []
+    variants = [base]
+    if bridge_settings.image_multi_query_enabled:
+        # Variant 1: bias toward real-world scene photos.
+        variants.append(f"{base} 实拍 场景")
+        # Variant 2: lightweight bilingual expansion for common dog breeds.
+        en = base
+        en = en.replace("金毛", "Golden Retriever")
+        en = en.replace("边牧", "Border Collie")
+        en = en.replace("同框", "together photo")
+        en = en.replace("左边", "left")
+        en = en.replace("右边", "right")
+        if en != base:
+            variants.append(en)
+    uniq = list(dict.fromkeys([v.strip() for v in variants if v.strip()]))
+    max_n = _cfg_int(bridge_settings.image_multi_query_max_variants, default=2, min_v=1, max_v=4)
+    return uniq[:max_n]
 
 
 @app.get("/healthz")
@@ -643,12 +582,23 @@ async def search_rank(req: ImageSearchRequest) -> dict[str, Any]:
 
     candidates: list[ImageCandidate] = []
     serpapi_debug: list[dict[str, Any]] = []
+    query_variants = _build_query_variants(req.query)
     if provider == "serpapi":
-        candidates, serpapi_debug = await _search_serpapi_with_debug(
-            req.query,
-            retrieval_k,
-            min_accessible=source_min_accessible,
-        )
+        merged: list[ImageCandidate] = []
+        seen_urls: set[str] = set()
+        for q in query_variants:
+            one, dbg = await _search_serpapi_with_debug(
+                q,
+                retrieval_k,
+                min_accessible=source_min_accessible,
+            )
+            serpapi_debug.append({"query": q, "attempts": dbg, "count": len(one)})
+            for c in one:
+                if c.url in seen_urls:
+                    continue
+                seen_urls.add(c.url)
+                merged.append(c)
+        candidates = merged
 
     fallback_used = False
     if not candidates:
@@ -657,43 +607,8 @@ async def search_rank(req: ImageSearchRequest) -> dict[str, Any]:
 
     filtered = await _chinese_clip_filter(req.query, candidates, top_k=top_k)
 
-    # Strict pipeline: retrieval top_k*10 -> CLIP keep top_k*2 -> VLM rerank pool top_k*2 -> final top_k.
-    pool_n = _cfg_int(bridge_settings.image_vlm_rank_pool, default=top_k * 2, min_v=top_k, max_v=24)
-    subset = filtered[: min(len(filtered), pool_n)]
-    reranked: list[ImageCandidate]
-    use_vlm_rank = bridge_settings.image_vlm_rank_enabled
-    if (
-        use_vlm_rank
-        and len(subset) >= 1
-    ):
-        try:
-            from app.services.qwen_vlm_images import has_vlm_credentials, vlm_rank_clip_pool
-
-            if has_vlm_credentials():
-                rows = [(c.url, c.title, c.desc, c.local_path) for c in subset]
-                indices = await vlm_rank_clip_pool(req.query, rows, top_k=top_k)
-                if indices and len(indices) == len(subset):
-                    ranked = [subset[i] for i in indices]
-                    seen = {c.url for c in ranked}
-                    for c in filtered:
-                        if len(ranked) >= top_k:
-                            break
-                        if c.url not in seen:
-                            ranked.append(c)
-                            seen.add(c.url)
-                    reranked = ranked[:top_k]
-                else:
-                    reranked = await _qwen_rerank(req.query, filtered, top_k=top_k)
-            else:
-                reranked = await _qwen_rerank(req.query, filtered, top_k=top_k)
-        except Exception:
-            logger.exception("image_vlm_rank_failed_fallback_text_rerank")
-            reranked = await _qwen_rerank(req.query, filtered, top_k=top_k)
-    else:
-        reranked = await _qwen_rerank(req.query, filtered, top_k=top_k)
-
     final_images = await _ensure_accessible_topk(
-        preferred=reranked[:top_k],
+        preferred=filtered[:top_k],
         fallback_pool=filtered,
         top_k=top_k,
     )
@@ -713,6 +628,7 @@ async def search_rank(req: ImageSearchRequest) -> dict[str, Any]:
         "debug": {
             "provider": provider,
             "fallback_used": fallback_used,
+            "query_variants": query_variants,
             "serpapi_keys": serpapi_debug,
         },
     }

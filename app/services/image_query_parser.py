@@ -12,6 +12,7 @@ import httpx
 from app.integrations.bridge_settings import bridge_settings
 from app.models.schemas import (
     ActionRelationConstraint,
+    ConstraintRelation,
     GeneralQueryConstraints,
     ImageSearchConstraints,
     ObjectRelationConstraint,
@@ -261,6 +262,42 @@ def _build_search_rewrite(constraints: ImageSearchConstraints) -> str:
     return " ".join(out) or _strip_fillers(constraints.raw_query)
 
 
+def _merge_relations(
+    spatial_relations: list[SpatialRelationConstraint],
+    action_relations: list[ActionRelationConstraint],
+    object_relations: list[ObjectRelationConstraint],
+) -> list[ConstraintRelation]:
+    relations: list[ConstraintRelation] = []
+    for rel in spatial_relations:
+        relations.append(
+            ConstraintRelation(
+                type="spatial",
+                relation=rel.relation,
+                subject=rel.primary_subject,
+                object=rel.secondary_subject,
+            )
+        )
+    for rel in action_relations:
+        relations.append(
+            ConstraintRelation(
+                type="action",
+                relation=rel.verb,
+                subject=rel.subject,
+                object=rel.object,
+            )
+        )
+    for rel in object_relations:
+        relations.append(
+            ConstraintRelation(
+                type="object",
+                relation=rel.relation,
+                subject=rel.subject,
+                object=rel.object,
+            )
+        )
+    return relations
+
+
 def _heuristic_constraints(query: str, entities: dict[str, str]) -> ImageSearchConstraints:
     text = query.strip()
     subjects: list[str] = []
@@ -375,15 +412,15 @@ def _heuristic_constraints(query: str, entities: dict[str, str]) -> ImageSearchC
             extracted_attributes.append(attr)
     constraints = ImageSearchConstraints(
         raw_query=text,
-        subjects=list(dict.fromkeys(cleaned_subjects))[:6],
+        entities={
+            "subjects": list(dict.fromkeys(cleaned_subjects))[:6],
+            "landmark": landmark,
+            "time_of_day": time_of_day,
+            "style_terms": style_terms,
+        },
         count=count,
-        landmark=landmark,
-        time_of_day=time_of_day,
-        attributes=list(dict.fromkeys(extracted_attributes)),
-        style_terms=style_terms,
-        spatial_relations=spatial_relations,
-        action_relations=action_relations,
-        object_relations=object_relations,
+        visual_attributes=list(dict.fromkeys(extracted_attributes)),
+        relations=_merge_relations(spatial_relations, action_relations, object_relations),
         parser_source="heuristic",
     )
     constraints.search_rewrite = _build_search_rewrite(constraints)
@@ -473,18 +510,18 @@ def _constraints_from_obj(query: str, obj: dict[str, Any], entities: dict[str, s
                 subject_synonyms[key] = list(dict.fromkeys(vals))
     constraints = ImageSearchConstraints(
         raw_query=query,
-        subjects=list(dict.fromkeys([s for s in subjects if s])),
-        attributes=attributes,
-        subject_synonyms=subject_synonyms,
-        style_terms=style_terms,
-        exclude_terms=exclude_terms,
+        entities={
+            "subjects": list(dict.fromkeys([s for s in subjects if s])),
+            "subject_synonyms": subject_synonyms,
+            "landmark": str(obj.get("landmark") or entities.get("landmark") or "").strip() or None,
+            "time_of_day": str(obj.get("time_of_day") or entities.get("time_of_day") or "").strip() or None,
+            "style_terms": style_terms,
+        },
+        visual_attributes=attributes,
+        negative_constraints=exclude_terms,
         count=count,
-        landmark=str(obj.get("landmark") or entities.get("landmark") or "").strip() or None,
-        time_of_day=str(obj.get("time_of_day") or entities.get("time_of_day") or "").strip() or None,
         must_have_all_subjects=bool(obj.get("must_have_all_subjects", True)),
-        spatial_relations=spatial_relations,
-        action_relations=action_relations,
-        object_relations=object_relations,
+        relations=_merge_relations(spatial_relations, action_relations, object_relations),
         needs_clarification=bool(obj.get("needs_clarification", False)),
         clarification_question=str(obj.get("clarification_question") or "").strip() or None,
         parser_source="llm",
@@ -497,6 +534,8 @@ def _constraints_from_obj(query: str, obj: dict[str, Any], entities: dict[str, s
 async def parse_image_search_constraints(
     query: str,
     entities: dict[str, str],
+    *,
+    allow_llm: bool = True,
 ) -> ImageSearchConstraints:
     cache_key = hashlib.md5(
         f"{query}::{json.dumps(entities, ensure_ascii=False, sort_keys=True)}".encode("utf-8")
@@ -508,7 +547,7 @@ async def parse_image_search_constraints(
 
     api_key, base, model = _llm_env()
     heuristic = _heuristic_constraints(query, entities)
-    if not api_key:
+    if not api_key or not allow_llm:
         _image_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
         _image_parse_cache.put(cache_key, heuristic, now)
         return heuristic
@@ -640,14 +679,18 @@ def _heuristic_general_constraints(query: str) -> GeneralQueryConstraints:
     rewritten = _strip_fillers(query)
     return GeneralQueryConstraints(
         raw_query=query,
-        city=city,
+        entities={"location": city} if city else {},
         compare_targets=compare_targets,
         search_rewrite=rewritten or query,
         parser_source="heuristic",
     )
 
 
-async def parse_general_query_constraints(query: str) -> GeneralQueryConstraints:
+async def parse_general_query_constraints(
+    query: str,
+    *,
+    allow_llm: bool = True,
+) -> GeneralQueryConstraints:
     cache_key = hashlib.md5(query.encode("utf-8")).hexdigest()
     now = time.time()
     cached = _general_parse_cache.get(cache_key, now)
@@ -656,16 +699,17 @@ async def parse_general_query_constraints(query: str) -> GeneralQueryConstraints
 
     api_key, base, model = _llm_env()
     heuristic = _heuristic_general_constraints(query)
-    if not api_key:
+    if not api_key or not allow_llm:
         _general_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
         _general_parse_cache.put(cache_key, heuristic, now)
         return heuristic
 
     prompt = (
         "你是通用问题解析器。请把用户问题解析成结构化 JSON。"
-        "重点识别：search_rewrite、city、attributes、compare_targets、needs_clarification、clarification_question。"
+        "重点识别：search_rewrite、entities、attributes、compare_targets、needs_clarification、clarification_question。"
+        "地点、城市、时间、产品、人物、机构等实体放入 entities；例如城市放入 entities.location。"
         "search_rewrite 应更适合搜索或检索，不要改变用户真实意图。"
-        "如果是天气类问题且缺城市，可以设置 needs_clarification=true。"
+        "如果是天气类问题且缺地点，可以设置 needs_clarification=true。"
         "只输出一个 JSON 对象，不要解释。\n"
         f"用户问题: {query}"
     )
@@ -682,10 +726,18 @@ async def parse_general_query_constraints(query: str) -> GeneralQueryConstraints
             _general_parse_cache.max_entries = bridge_settings.parser_cache_max_entries
             _general_parse_cache.put(cache_key, heuristic, now)
             return heuristic
+        entities_obj = obj.get("entities") if isinstance(obj.get("entities"), dict) else {}
+        location = str(
+            entities_obj.get("location")
+            or obj.get("location")
+            or obj.get("city")
+            or heuristic.city
+            or ""
+        ).strip()
         parsed = GeneralQueryConstraints(
             raw_query=query,
             search_rewrite=str(obj.get("search_rewrite") or heuristic.search_rewrite or query).strip(),
-            city=str(obj.get("city") or heuristic.city or "").strip() or None,
+            entities={**entities_obj, "location": location or None},
             attributes=[
                 str(v).strip()
                 for v in (obj.get("attributes") or [])

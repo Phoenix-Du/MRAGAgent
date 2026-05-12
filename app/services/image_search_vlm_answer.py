@@ -62,29 +62,36 @@ async def build_image_search_vlm_response(
     indices, selected, answer = await vlm_rank_and_answer_from_image_urls(
         prompt_query, rows, top_k=top_k
     )
+    strict_pool_size = min(
+        len(rows),
+        max(top_k * 2, 10),
+    )
     if selected:
         top = [rows[i] for i in selected[:top_k]]
+        strict_pool = [rows[i] for i in selected[:strict_pool_size]]
         add_runtime_flag("image_search_vlm_selected_applied")
         add_runtime_flag("image_search_vlm_rank_answer_combined")
     elif indices:
         top = [rows[i] for i in indices[:top_k]]
+        strict_pool = [rows[i] for i in indices[:strict_pool_size]]
         add_runtime_flag("image_search_vlm_rank_answer_combined")
     else:
         top = rows[:top_k]
+        strict_pool = rows[:strict_pool_size]
         answer = answer or await vlm_answer_from_image_urls(
             prompt_query, top, max_images=top_k
         )
         add_runtime_flag("image_search_vlm_rank_answer_fallback")
 
-    if top and _has_spatial_constraint(prompt_query):
+    if strict_pool and _has_spatial_constraint(prompt_query):
         before_spatial_count = len(top)
         strict_indices = await vlm_filter_strict_match_indices(
             prompt_query,
-            top,
+            strict_pool,
             max_keep=top_k,
         )
         if strict_indices is not None:
-            top = [top[i] for i in strict_indices]
+            top = [strict_pool[i] for i in strict_indices]
             add_runtime_flag("image_search_vlm_spatial_filter_applied")
             if not top:
                 answer = "已检索到候选图片，但其中没有严格满足左右位置约束的结果。"

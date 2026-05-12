@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import re
 import time
 from uuid import uuid4
 
+from app.core.progress import progress_event
 from app.core.runtime_flags import add_runtime_flag
 from app.core.retry import with_retry
 from app.core.runtime_flags import get_runtime_flags
@@ -10,7 +12,7 @@ from app.core.settings import settings
 from app.models.schemas import (
     NormalizedDocument,
     NormalizedPayload,
-    QueryRequest,
+    QueryExecutionContext,
     QueryResponse,
     SourceDoc,
 )
@@ -38,7 +40,7 @@ class MinAdapter:
         self.rag_client = rag_client
         self.dispatcher = dispatcher
 
-    async def normalize_input(self, payload: QueryRequest) -> NormalizedPayload:
+    async def normalize_input(self, payload: QueryExecutionContext) -> NormalizedPayload:
         documents: list[NormalizedDocument] = []
 
         source_docs, prepared_images = await self.dispatcher.prepare_documents(payload)
@@ -70,6 +72,7 @@ class MinAdapter:
 
         return NormalizedPayload(
             uid=payload.uid,
+            request_id=payload.request_id,
             intent=payload.intent,
             query=payload.query,
             image_search_query=payload.image_search_query,
@@ -83,27 +86,78 @@ class MinAdapter:
     async def ingest_to_rag(self, normalized: NormalizedPayload) -> list[str]:
         if normalized.intent == "image_search" and not settings.image_search_ingest_enabled:
             add_runtime_flag("image_search_ingest_skipped")
+            if normalized.request_id:
+                progress_event(
+                    normalized.request_id,
+                    "pipeline.ingest_skipped",
+                    "图搜链路已按配置跳过 RAG ingest。",
+                )
             return []
 
         tags = {"uid": normalized.uid, "intent": normalized.intent}
+        if normalized.request_id:
+            progress_event(
+                normalized.request_id,
+                "pipeline.ingest_running",
+                "RAG ingest 正在执行。",
+                {"documents_count": len(normalized.documents)},
+            )
 
         async def _ingest() -> list[str]:
             return await self.rag_client.ingest_documents(normalized.documents, tags)
 
-        return await with_retry(_ingest)
+        indexed = await with_retry(_ingest)
+        if normalized.request_id:
+            progress_event(
+                normalized.request_id,
+                "pipeline.ingest_done",
+                "RAG ingest 完成。",
+                {"indexed_count": len(indexed)},
+            )
+        return indexed
 
     async def query_with_context(self, normalized: NormalizedPayload) -> QueryResponse:
         start_ms = time.perf_counter()
         trace_id = f"tr_{uuid4().hex[:10]}"
 
         context = await self.memory_client.get_context(normalized.uid)
-        pref_hint = context.get("preferences", {}).get("answer_style", "")
+        if normalized.request_id:
+            progress_event(
+                normalized.request_id,
+                "pipeline.context_loaded",
+                "会话上下文加载完成。",
+                {"history_count": len(context.get("history") or [])},
+            )
+        preferences = context.get("preferences", {})
+        response_pref = preferences.get("response") if isinstance(preferences, dict) else {}
+        pref_hint = ""
+        if isinstance(response_pref, dict):
+            pref_hint = str(response_pref.get("style") or "").strip()
+        if not pref_hint and isinstance(preferences, dict):
+            pref_hint = str(preferences.get("answer_style") or "").strip()
 
         enhanced_query = normalized.query
         if pref_hint:
             enhanced_query = f"{normalized.query}\n[用户偏好回答风格]: {pref_hint}"
+        # Force answer language and weather-focus constraints for general QA.
+        if normalized.intent == "general_qa":
+            constraints: list[str] = ["请使用简体中文回答，不要使用英文。"]
+            if _is_weather_query(normalized.query):
+                constraints.append(
+                    "这是天气问答。只回答天气信息（如天气现象、温度范围、降雨、风力、湿度、空气质量、时间范围），"
+                    "不要介绍城市历史、景点、旅游信息。若证据不足请明确说明。"
+                )
+                add_runtime_flag("general_qa_weather_focus")
+            enhanced_query = f"{enhanced_query}\n\n[回答约束]\n" + "\n".join(constraints)
 
         if normalized.intent == "image_search":
+            if normalized.request_id:
+                progress_event(
+                    normalized.request_id,
+                    "image_search.answering",
+                    "正在执行多模态排序与答案生成。",
+                    {"max_images": normalized.max_images},
+                )
             result = await build_image_search_vlm_response(
                 query=(normalized.original_query or normalized.query),
                 documents=normalized.documents,
@@ -112,6 +166,12 @@ class MinAdapter:
                 trace_id=trace_id,
             )
         else:
+            if normalized.request_id:
+                progress_event(
+                    normalized.request_id,
+                    "general_qa.answering",
+                    "正在执行 RAG 查询与回答生成。",
+                )
 
             async def _query() -> QueryResponse:
                 return await self.rag_client.query(
@@ -132,6 +192,13 @@ class MinAdapter:
             answer=result.answer,
             intent=normalized.intent,
         )
+        if normalized.request_id:
+            progress_event(
+                normalized.request_id,
+                "pipeline.answer_done",
+                "答案生成与上下文写回完成。",
+                {"latency_ms": elapsed_ms},
+            )
         return result
 
     @staticmethod
@@ -147,3 +214,9 @@ class MinAdapter:
             metadata=meta,
         )
 
+
+def _is_weather_query(text: str) -> bool:
+    q = (text or "").strip()
+    if not q:
+        return False
+    return bool(re.search(r"(天气|气温|下雨|降雨|温度|风力|湿度|空气质量|体感)", q))

@@ -4,7 +4,6 @@ import re
 
 from app.models.schemas import ImageSearchConstraints
 
-
 _STOPWORDS = {
     "我想",
     "我想要",
@@ -21,6 +20,8 @@ _STOPWORDS = {
     "看看",
     "找找",
 }
+
+_WEATHER_KEYWORDS = ("天气", "气温", "下雨", "降雨", "温度", "风力", "湿度", "体感", "空气质量")
 
 
 def optimize_image_query(original_query: str, entities: dict[str, str]) -> str:
@@ -55,6 +56,7 @@ def optimize_image_query_with_constraints(
     constraints: ImageSearchConstraints | None,
     entities: dict[str, str],
 ) -> str:
+    """Legacy helper kept for compatibility; the image execution path consumes search_rewrite directly."""
     if constraints is not None and (constraints.search_rewrite or "").strip():
         return str(constraints.search_rewrite).strip()
     return optimize_image_query(original_query, entities)
@@ -79,6 +81,9 @@ def optimize_web_query(original_query: str) -> str:
 
     # Keep the original semantic core and add lightweight hints.
     hints = [h for h in (freshness_hint, compare_hint) if h]
+    if any(k in text for k in _WEATHER_KEYWORDS):
+        # Weather queries should bias toward forecast terms instead of city-intro pages.
+        hints.extend(["天气预报", "气温", "降雨", "风力", "湿度"])
     if not hints:
         return text
     return _dedup_join([text, *hints])

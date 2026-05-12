@@ -1,0 +1,955 @@
+{
+  "generated_at": "2026-05-08 00:08:48",
+  "asgi_overhead_benchmark": [
+    {
+      "concurrency": 1,
+      "requests": 20,
+      "success": 20,
+      "throughput_qps": 958.55,
+      "avg_latency_ms": 0.95,
+      "p95_latency_ms": 1
+    },
+    {
+      "concurrency": 5,
+      "requests": 50,
+      "success": 50,
+      "throughput_qps": 1381.14,
+      "avg_latency_ms": 0.66,
+      "p95_latency_ms": 1
+    },
+    {
+      "concurrency": 10,
+      "requests": 80,
+      "success": 80,
+      "throughput_qps": 1380.06,
+      "avg_latency_ms": 0.68,
+      "p95_latency_ms": 1
+    }
+  ],
+  "websrc_adaptation_eval": {
+    "dataset": "WebSRC v1.0 test stratified sample",
+    "rows": [
+      {
+        "case_id": "W01",
+        "domain": "game",
+        "page_id": "3800070",
+        "question": "What is this game's launch date?",
+        "answer": "Oct 05, 2018",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 2,
+        "layout_boxes": 172,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      },
+      {
+        "case_id": "W02",
+        "domain": "game",
+        "page_id": "3800117",
+        "question": "What is this game's launch date?",
+        "answer": "Nov 05, 2019",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 1,
+        "layout_boxes": 172,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      },
+      {
+        "case_id": "W03",
+        "domain": "game",
+        "page_id": "3800039",
+        "question": "What is this game's launch date?",
+        "answer": "Apr 28, 2020",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 1,
+        "layout_boxes": 170,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      },
+      {
+        "case_id": "W04",
+        "domain": "game",
+        "page_id": "3800041",
+        "question": "What is this game's launch date?",
+        "answer": "Sep 30, 2020",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 1,
+        "layout_boxes": 170,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      },
+      {
+        "case_id": "W05",
+        "domain": "game",
+        "page_id": "3800083",
+        "question": "What is this game's launch date?",
+        "answer": "Jun 13, 2019",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 1,
+        "layout_boxes": 170,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      },
+      {
+        "case_id": "W06",
+        "domain": "sports",
+        "page_id": "1600025",
+        "question": "What's the MIN value during 2011-12 in CLE?",
+        "answer": "30.5",
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 4,
+        "layout_boxes": 356,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1,
+          "table": 1
+        }
+      },
+      {
+        "case_id": "W07",
+        "domain": "sports",
+        "page_id": "1600053",
+        "question": "How many FGM did this player have in PHL when 2016-17?",
+        "answer": "6.45",
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 4,
+        "layout_boxes": 356,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1,
+          "table": 1
+        }
+      },
+      {
+        "case_id": "W08",
+        "domain": "sports",
+        "page_id": "1600023",
+        "question": "What is the count of GP in SEA when 2007-08?",
+        "answer": "80",
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 4,
+        "layout_boxes": 354,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1,
+          "table": 1
+        }
+      },
+      {
+        "case_id": "W09",
+        "domain": "sports",
+        "page_id": "1600055",
+        "question": "What's the FGA value during 2007-08 in ATL?",
+        "answer": "8.25",
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 4,
+        "layout_boxes": 354,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1,
+          "table": 1
+        }
+      },
+      {
+        "case_id": "W10",
+        "domain": "sports",
+        "page_id": "1600072",
+        "question": "What is the count of MIN in MEM when 2008-09?",
+        "answer": "30.7",
+        "image_count": 0,
+        "table_count": 1,
+        "link_count": 4,
+        "layout_boxes": 352,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1,
+          "table": 1
+        }
+      },
+      {
+        "case_id": "W11",
+        "domain": "game",
+        "page_id": "3800078",
+        "question": "What is this game's launch date?",
+        "answer": "Nov 19, 2019",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 2,
+        "layout_boxes": 158,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      },
+      {
+        "case_id": "W12",
+        "domain": "game",
+        "page_id": "3800052",
+        "question": "What is this game's launch date?",
+        "answer": "Jun 15, 2020",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 2,
+        "layout_boxes": 154,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      },
+      {
+        "case_id": "W13",
+        "domain": "game",
+        "page_id": "3800091",
+        "question": "What is this game's launch date?",
+        "answer": "Jun 12, 2018",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 1,
+        "layout_boxes": 170,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      },
+      {
+        "case_id": "W14",
+        "domain": "game",
+        "page_id": "3800107",
+        "question": "What is this game's launch date?",
+        "answer": "Mar 30, 2020",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 1,
+        "layout_boxes": 170,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      },
+      {
+        "case_id": "W15",
+        "domain": "game",
+        "page_id": "3800110",
+        "question": "What is this game's launch date?",
+        "answer": "Nov 14, 2017",
+        "image_count": 4,
+        "table_count": 0,
+        "link_count": 1,
+        "layout_boxes": 170,
+        "raw_html_answer_coverage": true,
+        "crawl4ai_answer_coverage": true,
+        "system_answer_coverage": true,
+        "crawl4ai_resource_preserved": true,
+        "system_resource_preserved": true,
+        "source_doc_valid": true,
+        "rag_bridge_valid": true,
+        "rag_item_counts": {
+          "text": 1
+        }
+      }
+    ],
+    "corpus_stats": {
+      "pages": 721,
+      "image_page_rate": 0.448,
+      "table_page_rate": 0.4147,
+      "link_page_rate": 0.724,
+      "layout_page_rate": 1.0,
+      "avg_images": 1.251,
+      "avg_tables": 0.4147,
+      "avg_links": 2.8336,
+      "avg_layout_boxes": 184.7129
+    },
+    "summary": {
+      "count": 15,
+      "avg_images": 2.67,
+      "avg_tables": 0.33,
+      "avg_links": 2.2,
+      "avg_layout_boxes": 229.87,
+      "raw_html_answer_coverage": 1.0,
+      "system_answer_coverage": 1.0,
+      "source_doc_valid_rate": 1.0,
+      "rag_bridge_valid_rate": 1.0
+    },
+    "ablation": [
+      {
+        "method": "Raw HTML Text",
+        "answer_coverage": 1.0,
+        "resource_preservation": 0.0,
+        "layout_preservation": 0.0,
+        "sourcedoc_valid": 0.0,
+        "rag_bridge_valid": 0.0
+      },
+      {
+        "method": "Crawl4AI only",
+        "answer_coverage": 1.0,
+        "resource_preservation": 1.0,
+        "layout_preservation": 1.0,
+        "sourcedoc_valid": 0.0,
+        "rag_bridge_valid": 0.0
+      },
+      {
+        "method": "System fusion adapter",
+        "answer_coverage": 1.0,
+        "resource_preservation": 1.0,
+        "layout_preservation": 1.0,
+        "sourcedoc_valid": 1.0,
+        "rag_bridge_valid": 0.0
+      },
+      {
+        "method": "System + RAGAnything Bridge",
+        "answer_coverage": 1.0,
+        "resource_preservation": 1.0,
+        "layout_preservation": 1.0,
+        "sourcedoc_valid": 1.0,
+        "rag_bridge_valid": 1.0
+      }
+    ]
+  },
+  "coco_image_retrieval_eval": {
+    "dataset": "MSCOCO Karpathy test shard-00000 micro retrieval",
+    "query_count": 15,
+    "candidate_count": 50,
+    "rows": [
+      {
+        "case_id": "I01",
+        "query": "A man with a red helmet on a small moped on a dirt road.",
+        "gold_key": "000000000",
+        "random_rank": 2,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I02",
+        "query": "A young girl inhales with the intent of blowing out a candle.",
+        "gold_key": "000000001",
+        "random_rank": 4,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I03",
+        "query": "A man on a bicycle riding next to a train",
+        "gold_key": "000000002",
+        "random_rank": 48,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I04",
+        "query": "A kitchen is shown with a variety of items on the counters.",
+        "gold_key": "000000003",
+        "random_rank": 17,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I05",
+        "query": "A wooden ball on top of a wooden stick.",
+        "gold_key": "000000004",
+        "random_rank": 35,
+        "clip_rank": 2,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 1,
+        "system_answer_preview": "The selected image displays a collection of wooden kitchen utensils laid out on a table. In the foreground, there is a specific tool that matches the description: it features a lon"
+      },
+      {
+        "case_id": "I06",
+        "query": "Multiple wooden spoons are shown on a table top.",
+        "gold_key": "000000005",
+        "random_rank": 42,
+        "clip_rank": 1,
+        "blip_itm_rank": 2,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I07",
+        "query": "A bathroom that has a broken wall in the shower.",
+        "gold_key": "000000006",
+        "random_rank": 10,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I08",
+        "query": "A bathroom with an enclosed shower next to a sink and a toilet.",
+        "gold_key": "000000007",
+        "random_rank": 10,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 1,
+        "system_answer_preview": "The image displays a bathroom featuring an enclosed glass shower stall situated next to a white pedestal sink and a toilet."
+      },
+      {
+        "case_id": "I09",
+        "query": "people on bicycles ride down a busy street",
+        "gold_key": "000000008",
+        "random_rank": 33,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I10",
+        "query": "The bathroom is clean and ready to be used.",
+        "gold_key": "000000009",
+        "random_rank": 26,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 3,
+        "system_returned_images": 3,
+        "system_answer_preview": "The selected images depict bathrooms that appear clean and ready for use. One image shows a modern bathroom with a glass-enclosed shower, pedestal sink, and toilet, all looking pri"
+      },
+      {
+        "case_id": "I11",
+        "query": "A clean bathroom is seen in this image.",
+        "gold_key": "000000010",
+        "random_rank": 13,
+        "clip_rank": 3,
+        "blip_itm_rank": 2,
+        "system_rank": 3,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I12",
+        "query": "A young man wearing black attire and a flowered tie is standing and smiling.",
+        "gold_key": "000000011",
+        "random_rank": 50,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "结论：候选图0  理由： - 图中为一名年轻男性，穿着黑色衬衫（黑色着装）。 - 佩戴一条带有花卉图案的领带。 - 呈站立姿态并面带微笑。  其他候选图均不符合上述描述。"
+      },
+      {
+        "case_id": "I13",
+        "query": "Black and white photograph of two men on motorcycles.",
+        "gold_key": "000000012",
+        "random_rank": 11,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I14",
+        "query": "A row of motorcycles parked in front of a building.",
+        "gold_key": "000000013",
+        "random_rank": 24,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 5,
+        "system_answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。"
+      },
+      {
+        "case_id": "I15",
+        "query": "A fluffy white chair that faces away fro a television.",
+        "gold_key": "000000014",
+        "random_rank": 5,
+        "clip_rank": 1,
+        "blip_itm_rank": 1,
+        "system_rank": 1,
+        "system_returned_images": 1,
+        "system_answer_preview": "The selected image shows a fluffy white chair positioned next to a television. The chair is facing away from the TV screen, which is displaying a football game."
+      }
+    ],
+    "baselines": [
+      {
+        "method": "Random",
+        "model": "random permutation",
+        "recall_at_1": 0.0,
+        "recall_at_5": 0.2,
+        "recall_at_10": 0.3333,
+        "mrr": 0.1054
+      },
+      {
+        "method": "CLIP",
+        "model": "openai/clip-vit-base-patch32",
+        "recall_at_1": 0.8667,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.9222
+      },
+      {
+        "method": "BLIP-ITM",
+        "model": "Salesforce/blip-itm-base-coco",
+        "recall_at_1": 0.8667,
+        "recall_at_5": 1.0,
+        "recall_at_10": 1.0,
+        "mrr": 0.9333
+      },
+      {
+        "method": "System CLIP coarse + Qwen VLM selector",
+        "model": "qwen3.5-omni-plus-2026-03-15",
+        "clip_top_n": 10,
+        "recall_at_1": 0.8667,
+        "recall_at_5": 1.0,
+        "mrr": 0.9111,
+        "returned_image_rate": 1.0,
+        "degraded_rate": 0.6667,
+        "latency": {
+          "avg_ms": 33885.67,
+          "p50_ms": 31045,
+          "p95_ms": 158921
+        }
+      }
+    ],
+    "system_rows": [
+      {
+        "case_id": "I01",
+        "query": "A man with a red helmet on a small moped on a dirt road.",
+        "gold_key": "000000000",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000000",
+          "000000058",
+          "000000038",
+          "000000012",
+          "000000039"
+        ],
+        "returned_images": 5,
+        "latency_ms": 31045,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I02",
+        "query": "A young girl inhales with the intent of blowing out a candle.",
+        "gold_key": "000000001",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000001",
+          "000000079",
+          "000000045",
+          "000000053",
+          "000000040"
+        ],
+        "returned_images": 5,
+        "latency_ms": 32720,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I03",
+        "query": "A man on a bicycle riding next to a train",
+        "gold_key": "000000002",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000002",
+          "000000065",
+          "000000021",
+          "000000012",
+          "000000030"
+        ],
+        "returned_images": 5,
+        "latency_ms": 158921,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I04",
+        "query": "A kitchen is shown with a variety of items on the counters.",
+        "gold_key": "000000003",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000003",
+          "000000010",
+          "000000072",
+          "000000006",
+          "000000015"
+        ],
+        "returned_images": 5,
+        "latency_ms": 7024,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I05",
+        "query": "A wooden ball on top of a wooden stick.",
+        "gold_key": "000000004",
+        "coarse_gold_rank": 2,
+        "rank": 1,
+        "selected_keys": [
+          "000000004"
+        ],
+        "returned_images": 1,
+        "latency_ms": 34817,
+        "answer_preview": "The selected image displays a collection of wooden kitchen utensils laid out on a table. In the foreground, there is a specific tool that matches the description: it features a lon",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I06",
+        "query": "Multiple wooden spoons are shown on a table top.",
+        "gold_key": "000000005",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000005",
+          "000000004",
+          "000000014",
+          "000000079",
+          "000000024"
+        ],
+        "returned_images": 5,
+        "latency_ms": 14567,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I07",
+        "query": "A bathroom that has a broken wall in the shower.",
+        "gold_key": "000000006",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000006",
+          "000000009",
+          "000000014",
+          "000000011",
+          "000000054"
+        ],
+        "returned_images": 5,
+        "latency_ms": 6600,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I08",
+        "query": "A bathroom with an enclosed shower next to a sink and a toilet.",
+        "gold_key": "000000007",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000007"
+        ],
+        "returned_images": 1,
+        "latency_ms": 9746,
+        "answer_preview": "The image displays a bathroom featuring an enclosed glass shower stall situated next to a white pedestal sink and a toilet.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I09",
+        "query": "people on bicycles ride down a busy street",
+        "gold_key": "000000008",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000008",
+          "000000038",
+          "000000030",
+          "000000058",
+          "000000065"
+        ],
+        "returned_images": 5,
+        "latency_ms": 43054,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I10",
+        "query": "The bathroom is clean and ready to be used.",
+        "gold_key": "000000009",
+        "coarse_gold_rank": 1,
+        "rank": 3,
+        "selected_keys": [
+          "000000007",
+          "000000010",
+          "000000009"
+        ],
+        "returned_images": 3,
+        "latency_ms": 50205,
+        "answer_preview": "The selected images depict bathrooms that appear clean and ready for use. One image shows a modern bathroom with a glass-enclosed shower, pedestal sink, and toilet, all looking pri",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I11",
+        "query": "A clean bathroom is seen in this image.",
+        "gold_key": "000000010",
+        "coarse_gold_rank": 3,
+        "rank": 3,
+        "selected_keys": [
+          "000000006",
+          "000000009",
+          "000000010",
+          "000000005",
+          "000000037"
+        ],
+        "returned_images": 5,
+        "latency_ms": 12004,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I12",
+        "query": "A young man wearing black attire and a flowered tie is standing and smiling.",
+        "gold_key": "000000011",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000011",
+          "000000074",
+          "000000056",
+          "000000079",
+          "000000073"
+        ],
+        "returned_images": 5,
+        "latency_ms": 37798,
+        "answer_preview": "结论：候选图0  理由： - 图中为一名年轻男性，穿着黑色衬衫（黑色着装）。 - 佩戴一条带有花卉图案的领带。 - 呈站立姿态并面带微笑。  其他候选图均不符合上述描述。",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I13",
+        "query": "Black and white photograph of two men on motorcycles.",
+        "gold_key": "000000012",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000012",
+          "000000000",
+          "000000058",
+          "000000036",
+          "000000055"
+        ],
+        "returned_images": 5,
+        "latency_ms": 11105,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I14",
+        "query": "A row of motorcycles parked in front of a building.",
+        "gold_key": "000000013",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000013",
+          "000000012",
+          "000000037",
+          "000000017",
+          "000000034"
+        ],
+        "returned_images": 5,
+        "latency_ms": 9168,
+        "answer_preview": "未能生成多模态回答（请检查 QWEN_API_KEY 与 QWEN_VLM_MODEL，或稍后重试）。以下为检索到的图片链接，便于人工查看。",
+        "runtime_flags": [
+          "image_search_vlm_answer_degraded",
+          "image_search_vlm_answer_empty",
+          "image_search_vlm_rank_answer_fallback"
+        ],
+        "error": ""
+      },
+      {
+        "case_id": "I15",
+        "query": "A fluffy white chair that faces away fro a television.",
+        "gold_key": "000000014",
+        "coarse_gold_rank": 1,
+        "rank": 1,
+        "selected_keys": [
+          "000000014"
+        ],
+        "returned_images": 1,
+        "latency_ms": 49511,
+        "answer_preview": "The selected image shows a fluffy white chair positioned next to a television. The chair is facing away from the TV screen, which is displaying a football game.",
+        "runtime_flags": [
+          "image_search_vlm_answer_generated",
+          "image_search_vlm_rank_answer_combined",
+          "image_search_vlm_selected_applied"
+        ],
+        "error": ""
+      }
+    ]
+  }
+}

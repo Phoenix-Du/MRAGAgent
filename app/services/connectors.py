@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
+import re
 from copy import deepcopy
+from html import unescape
 from hashlib import md5
 from typing import Any
+from urllib.parse import parse_qs, urljoin, urlparse
 
 import httpx
 
@@ -12,6 +16,7 @@ from app.core.metrics import metrics
 from app.core.retry import with_retry
 from app.core.runtime_flags import add_runtime_flag
 from app.core.settings import settings
+from app.core.url_safety import is_safe_public_http_url
 from app.models.schemas import ModalElement, SourceDoc
 
 logger = logging.getLogger(__name__)
@@ -127,6 +132,164 @@ def _media_dict_to_modal_items(media: dict[str, Any]) -> list[dict[str, Any]]:
     return items
 
 
+_CRAWL_HTTP_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
+}
+
+
+def _clean_extracted_text(text: str, max_chars: int = 60_000) -> str:
+    normalized = re.sub(r"[ \t\r\f\v]+", " ", text or "")
+    normalized = re.sub(r"\n{3,}", "\n\n", normalized)
+    normalized = re.sub(
+        r"(?is)Unsupported Browser Detected.*?Please update to a modern browser.*?(?=\n|$)",
+        " ",
+        normalized,
+    )
+    normalized = re.sub(
+        r"(?is)The web Browser you are currently using is unsupported.*?(?=\n|$)",
+        " ",
+        normalized,
+    )
+    return normalized.strip()[:max_chars]
+
+
+def _extract_html_content(html: str, base_url: str) -> dict[str, Any] | None:
+    try:
+        from bs4 import BeautifulSoup  # type: ignore
+
+        soup = BeautifulSoup(html, "html.parser")
+        for node in soup(["script", "style", "noscript", "svg", "template", "form"]):
+            node.decompose()
+        for node in soup(["header", "nav", "footer", "aside"]):
+            node.decompose()
+
+        title = soup.title.get_text(" ", strip=True) if soup.title else ""
+        content_root = soup.find("main") or soup.find("article") or soup.body or soup
+        text = _clean_extracted_text(content_root.get_text("\n", strip=True))
+
+        images: list[dict[str, str]] = []
+        seen: set[str] = set()
+        for img in soup.find_all("img"):
+            src = img.get("src") or img.get("data-src") or img.get("data-original")
+            if not src:
+                continue
+            abs_url = urljoin(base_url, str(src).strip())
+            if abs_url in seen:
+                continue
+            seen.add(abs_url)
+            desc = str(img.get("alt") or img.get("title") or "").strip()
+            images.append({"type": "image", "url": abs_url, "desc": desc})
+            if len(images) >= 5:
+                break
+        if not text:
+            return None
+        return {"title": title, "text_content": text, "modal_elements": images}
+    except Exception:
+        logger.debug("beautifulsoup_html_extract_failed", exc_info=True)
+
+    no_script = re.sub(r"(?is)<(script|style|noscript|svg|template).*?>.*?</\1>", " ", html)
+    title_match = re.search(r"(?is)<title[^>]*>(.*?)</title>", no_script)
+    title = unescape(re.sub(r"(?is)<.*?>", " ", title_match.group(1))).strip() if title_match else ""
+    body = re.sub(r"(?is)<(header|nav|footer|aside|form).*?>.*?</\1>", " ", no_script)
+    text = _clean_extracted_text(unescape(re.sub(r"(?is)<[^>]+>", "\n", body)))
+    if not text:
+        return None
+    return {"title": title, "text_content": text, "modal_elements": []}
+
+
+def _normalize_duckduckgo_href(href: str) -> str:
+    candidate = href.strip()
+    if not candidate:
+        return ""
+    if candidate.startswith("//"):
+        candidate = "https:" + candidate
+    if candidate.startswith("/"):
+        candidate = urljoin("https://duckduckgo.com", candidate)
+    parsed = urlparse(candidate)
+    if "duckduckgo.com" in parsed.netloc and parsed.path.startswith("/l/"):
+        target = (parse_qs(parsed.query).get("uddg") or [""])[0]
+        return target.strip()
+    return candidate
+
+
+def _map_duckduckgo_html(html: str, query: str, top_k: int) -> list[SourceDoc]:
+    mapped: list[SourceDoc] = []
+    seen: set[str] = set()
+    try:
+        from bs4 import BeautifulSoup  # type: ignore
+
+        soup = BeautifulSoup(html, "html.parser")
+        anchors = soup.select("a.result__a") or soup.find_all("a")
+        for anchor in anchors:
+            href = anchor.get("href")
+            if not href:
+                continue
+            url = _normalize_duckduckgo_href(str(href))
+            if not url or url in seen or not url.startswith(("http://", "https://")):
+                continue
+            if "duckduckgo.com" in (urlparse(url).netloc or "").lower():
+                continue
+            seen.add(url)
+            title = anchor.get_text(" ", strip=True)
+            parent = anchor.find_parent("div")
+            snippet_node = parent.select_one(".result__snippet") if parent else None
+            snippet = snippet_node.get_text(" ", strip=True) if snippet_node else ""
+            text = f"{title}\n{snippet}".strip() or url
+            mapped.append(
+                SourceDoc(
+                    doc_id=f"search::{md5(url.encode('utf-8')).hexdigest()[:10]}",
+                    text_content=text,
+                    modal_elements=[],
+                    structure={"type": "search_hit"},
+                    metadata={
+                        "source": "search_duckduckgo_html",
+                        "url": url,
+                        "title": title,
+                        "snippet": snippet,
+                        "query": query,
+                    },
+                )
+            )
+            if len(mapped) >= top_k:
+                break
+    except Exception:
+        logger.debug("duckduckgo_html_parse_failed", exc_info=True)
+
+    if mapped:
+        return mapped
+
+    for href, title in re.findall(r'(?is)<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>', html):
+        url = _normalize_duckduckgo_href(unescape(re.sub(r"(?is)<[^>]+>", "", href)))
+        if not url or url in seen or not url.startswith(("http://", "https://")):
+            continue
+        if "duckduckgo.com" in (urlparse(url).netloc or "").lower():
+            continue
+        seen.add(url)
+        clean_title = _clean_extracted_text(unescape(re.sub(r"(?is)<[^>]+>", " ", title)), max_chars=200)
+        mapped.append(
+            SourceDoc(
+                doc_id=f"search::{md5(url.encode('utf-8')).hexdigest()[:10]}",
+                text_content=clean_title or url,
+                modal_elements=[],
+                structure={"type": "search_hit"},
+                metadata={
+                    "source": "search_duckduckgo_html",
+                    "url": url,
+                    "title": clean_title,
+                    "snippet": "",
+                    "query": query,
+                },
+            )
+        )
+        if len(mapped) >= top_k:
+            break
+    return mapped
+
+
 class SearchClient:
     async def search_web_hits(self, query: str, top_k: int = 10) -> list[SourceDoc]:
         if settings.serpapi_endpoint:
@@ -142,7 +305,7 @@ class SearchClient:
                         return self._map_search_hits(data=data, query=query, top_k=top_k)
 
                 return await with_retry(_call)
-            except (httpx.HTTPError, ValueError, TypeError):
+            except Exception:
                 add_runtime_flag("search_fallback")
                 metrics.inc("search_fallback_total")
                 logger.warning("search_fallback_used reason=remote_search_hits_failed")
@@ -184,6 +347,17 @@ class SearchClient:
                 add_runtime_flag("search_fallback")
                 metrics.inc("search_fallback_total")
                 logger.warning("search_fallback_used reason=direct_serpapi_failed")
+
+        try:
+            html_hits = await self._search_duckduckgo_html(query=query, top_k=top_k)
+            if html_hits:
+                add_runtime_flag("search_html_fallback")
+                metrics.inc("search_fallback_total")
+                return html_hits
+        except Exception:
+            add_runtime_flag("search_fallback")
+            metrics.inc("search_fallback_total")
+            logger.warning("search_fallback_used reason=duckduckgo_html_failed")
 
         if not settings.allow_placeholder_fallback:
             add_runtime_flag("search_unavailable")
@@ -254,14 +428,41 @@ class SearchClient:
         # dedupe preserving order
         return list(dict.fromkeys(key_candidates))
 
+    @staticmethod
+    async def _search_duckduckgo_html(query: str, top_k: int) -> list[SourceDoc]:
+        async with httpx.AsyncClient(
+            timeout=settings.request_timeout_seconds,
+            trust_env=False,
+            headers=_CRAWL_HTTP_HEADERS,
+            follow_redirects=True,
+        ) as client:
+            resp = await client.get(
+                "https://duckduckgo.com/html/",
+                params={"q": query},
+            )
+            resp.raise_for_status()
+            return _map_duckduckgo_html(resp.text, query=query, top_k=top_k)
+
 
 class CrawlClient:
     async def crawl(self, url: str) -> SourceDoc:
         if settings.crawl4ai_local_enabled:
             try:
-                local_data = await self._crawl_with_local_sdk(url)
+                local_data = await asyncio.wait_for(
+                    self._crawl_with_local_sdk(url),
+                    timeout=max(
+                        0.001,
+                        min(
+                            float(settings.request_timeout_seconds),
+                            float(settings.crawl4ai_local_timeout_seconds),
+                        ),
+                    ),
+                )
                 if local_data is not None:
                     return self._map_crawl4ai_response(url=url, data=local_data)
+            except asyncio.TimeoutError:
+                add_runtime_flag("crawl_local_sdk_timeout")
+                logger.warning("crawl_local_sdk_timeout url=%s", url)
             except Exception:
                 logger.warning("crawl_local_sdk_failed url=%s", url)
 
@@ -297,6 +498,15 @@ class CrawlClient:
                     logger.warning("crawl_fallback_used url=%s", url)
                     metrics.inc("crawl_fallback_total")
 
+        try:
+            http_data = await self._crawl_with_http_fallback(url)
+            if http_data is not None:
+                add_runtime_flag("crawl_http_fallback")
+                metrics.inc("crawl_fallback_total")
+                return self._map_crawl4ai_response(url=url, data=http_data)
+        except Exception:
+            logger.warning("crawl_http_fallback_failed url=%s", url)
+
         if not settings.allow_placeholder_fallback:
             add_runtime_flag("crawl_unavailable")
             raise RuntimeError(f"crawl unavailable for url={url}")
@@ -309,6 +519,75 @@ class CrawlClient:
             structure={"type": "webpage"},
             metadata={"source": "crawl4ai", "url": url},
         )
+
+    @staticmethod
+    async def _crawl_with_http_fallback(url: str) -> dict[str, Any] | None:
+        current_url = url
+        async with httpx.AsyncClient(
+            timeout=settings.request_timeout_seconds,
+            trust_env=False,
+            headers=_CRAWL_HTTP_HEADERS,
+        ) as client:
+            for _ in range(6):
+                resp = await client.get(current_url)
+                if 300 <= resp.status_code < 400:
+                    location = resp.headers.get("location")
+                    if not location:
+                        break
+                    next_url = urljoin(current_url, location)
+                    if not is_safe_public_http_url(next_url):
+                        add_runtime_flag("crawl_redirect_blocked")
+                        return None
+                    current_url = next_url
+                    continue
+                break
+            else:
+                add_runtime_flag("crawl_redirect_limit")
+                return None
+
+        resp.raise_for_status()
+        content_type = (resp.headers.get("content-type") or "").lower()
+        if "text/plain" in content_type:
+            text = _clean_extracted_text(resp.text)
+            if not text:
+                return None
+            return {
+                "doc_id": f"crawl::{md5(url.encode('utf-8')).hexdigest()[:10]}",
+                "text_content": text,
+                "title": "",
+                "modal_elements": [],
+                "structure": {"type": "webpage"},
+                "metadata": {
+                    "source": "http_fallback_crawl",
+                    "url": url,
+                    "final_url": str(resp.url),
+                    "content_type": content_type,
+                },
+            }
+        if "text/html" not in content_type and "application/xhtml" not in content_type:
+            return None
+
+        extracted = _extract_html_content(resp.text, str(resp.url))
+        if extracted is None:
+            return None
+        return {
+            "doc_id": f"crawl::{md5(url.encode('utf-8')).hexdigest()[:10]}",
+            "text_content": extracted["text_content"],
+            "title": extracted.get("title") or "",
+            "modal_elements": extracted.get("modal_elements") or [],
+            "structure": {
+                "type": "webpage",
+                "title": extracted.get("title") or "",
+                "fallback": "http",
+            },
+            "metadata": {
+                "source": "http_fallback_crawl",
+                "url": url,
+                "final_url": str(resp.url),
+                "title": extracted.get("title") or "",
+                "content_type": content_type,
+            },
+        }
 
     @staticmethod
     async def _crawl_with_local_sdk(url: str) -> dict | None:
@@ -551,7 +830,9 @@ class BGERerankClient:
 
 
 class ImagePipelineClient:
-    async def search_and_rank_images(self, query: str, top_k: int = 5) -> list[ModalElement]:
+    async def search_and_rank_images_with_debug(
+        self, query: str, top_k: int = 5
+    ) -> tuple[list[ModalElement], dict[str, Any] | None]:
         if settings.image_pipeline_endpoint:
             try:
                 async with httpx.AsyncClient(
@@ -566,22 +847,29 @@ class ImagePipelineClient:
                     data = resp.json()
                     mapped = self._map_image_pipeline_response(data)
                     if mapped:
-                        return mapped[:top_k]
+                        debug = data.get("debug") if isinstance(data, dict) else None
+                        return mapped[:top_k], (debug if isinstance(debug, dict) else None)
             except (httpx.HTTPError, ValueError, TypeError):
                 # Fall back to mock results if external image service fails.
                 add_runtime_flag("image_pipeline_fallback")
                 logger.warning("image_pipeline_fallback_used reason=remote_image_pipeline_failed")
                 metrics.inc("image_pipeline_fallback_total")
-
         # Placeholder for Google Image API + CLIP + QwenVLM pipeline.
-        return [
-            ModalElement(
-                type="image",
-                url=f"https://images.example.com/{idx}.png",
-                desc=f"image result {idx} for {query}",
-            )
-            for idx in range(1, top_k + 1)
-        ]
+        return (
+            [
+                ModalElement(
+                    type="image",
+                    url=f"https://images.example.com/{idx}.png",
+                    desc=f"image result {idx} for {query}",
+                )
+                for idx in range(1, top_k + 1)
+            ],
+            {"provider": "placeholder", "fallback_used": True},
+        )
+
+    async def search_and_rank_images(self, query: str, top_k: int = 5) -> list[ModalElement]:
+        images, _debug = await self.search_and_rank_images_with_debug(query, top_k=top_k)
+        return images
 
     @staticmethod
     def _map_image_pipeline_response(data: dict) -> list[ModalElement]:

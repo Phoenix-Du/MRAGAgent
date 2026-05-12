@@ -12,6 +12,7 @@ class AppSettings(BaseSettings):
     # External connectors (replace with real endpoints)
     crawl4ai_endpoint: str | None = None
     crawl4ai_local_enabled: bool = True
+    crawl4ai_local_timeout_seconds: int = 12
     serpapi_endpoint: str | None = None
     serpapi_api_keys: str | None = None
     serpapi_api_key: str | None = None

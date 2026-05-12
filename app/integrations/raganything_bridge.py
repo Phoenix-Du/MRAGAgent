@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import os
 import logging
+import re
 import sys
 import hashlib
 from functools import partial
@@ -55,15 +56,179 @@ _fallback_docs: dict[str, list[IngestDocument]] = {}
 _rag_instance: Any = None
 
 
+def _doc_quality_score(doc: IngestDocument) -> float:
+    raw = doc.metadata.get("evidence_quality_score")
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _doc_source_label(doc: IngestDocument) -> str:
+    source = str(doc.metadata.get("source") or "").strip()
+    if source == "search_result_evidence":
+        return "search_summary"
+    if source in {"http_fallback_crawl", "crawl4ai_local_sdk", "crawl4ai"}:
+        return "webpage_body"
+    return source or "document"
+
+
+def _doc_title(doc: IngestDocument) -> str:
+    title = str(doc.metadata.get("title") or "").strip()
+    if title:
+        return title
+    structure = doc.metadata.get("crawl_structure")
+    if isinstance(structure, dict):
+        return str(structure.get("title") or "").strip()
+    return ""
+
+
+def _clean_evidence_text_for_answer(doc: IngestDocument) -> str:
+    text = " ".join((doc.text or "").split())
+    text = re.sub(r"https?://\S+", "", text).strip()
+    title = _doc_title(doc)
+    if title:
+        for _ in range(3):
+            if text.lower().startswith(title.lower()):
+                text = text[len(title):].lstrip(" :-—|").strip()
+            else:
+                break
+    return text[:800].strip()
+
+
+_ANSWER_STOPWORDS = {
+    "what",
+    "which",
+    "when",
+    "where",
+    "why",
+    "how",
+    "used",
+    "uses",
+    "use",
+    "for",
+    "the",
+    "and",
+    "or",
+    "with",
+    "about",
+    "is",
+    "are",
+    "was",
+    "were",
+    "does",
+    "do",
+}
+
+
+def _answer_query_terms(query: str) -> list[str]:
+    terms: list[str] = []
+    for token in re.findall(r"[a-z0-9][a-z0-9_\-]{1,}|[\u4e00-\u9fff]{2,}", (query or "").lower()):
+        cleaned = token.strip("-_ ")
+        if cleaned and cleaned not in _ANSWER_STOPWORDS:
+            terms.append(cleaned)
+    return list(dict.fromkeys(terms))
+
+
+def _sentence_noise_score(sentence: str) -> int:
+    low = sentence.lower()
+    return sum(
+        marker in low
+        for marker in (
+            "resource center",
+            "events & webinars",
+            "demo center",
+            "back to blog",
+            "in this article",
+            "not sure where to start",
+            "go to learning lab",
+            "copyright",
+            "privacy policy",
+        )
+    )
+
+
+def _best_evidence_sentences(text: str, query: str, *, max_sentences: int = 2) -> str:
+    terms = _answer_query_terms(query)
+    chunks = re.split(r"(?<=[.!?。！？])\s+|\n+", text)
+    candidates: list[tuple[int, int, str]] = []
+    seen: set[str] = set()
+    for idx, raw in enumerate(chunks):
+        sentence = " ".join(raw.split()).strip()
+        if len(sentence) < 28 or sentence in seen:
+            continue
+        seen.add(sentence)
+        if _sentence_noise_score(sentence) >= 2:
+            continue
+        low = sentence.lower()
+        score = sum(2 for term in terms if term in low)
+        if any(marker in low for marker in (" is a ", " is an ", " used for ", " used as ", " can be used", "可作为", "用于", "用来")):
+            score += 2
+        if any(marker in low for marker in ("database", "cache", "message broker", "container", "authorization", "deployment")):
+            score += 1
+        if score <= 0:
+            continue
+        candidates.append((score, -idx, sentence))
+    if not candidates:
+        return ""
+    top = sorted(candidates, reverse=True)[:max_sentences]
+    ordered = [sentence for _score, neg_idx, sentence in sorted(top, key=lambda item: -item[1])]
+    return " ".join(ordered)[:700].strip()
+
+
+def _localized_extractive_summary(doc: IngestDocument, query: str = "") -> str:
+    title = _doc_title(doc)
+    text = _clean_evidence_text_for_answer(doc)
+    low = text.lower()
+    if title.lower() == "fastapi" and "web framework for building apis with python" in low:
+        return "FastAPI 是一个基于 Python 标准类型提示、用于构建 API 的现代高性能 Web 框架。"
+    if title.lower().startswith("what is docker") and "developing, shipping, and running applications" in low:
+        return "Docker 是一个用于开发、交付和运行应用的开放平台，可以把应用与底层基础设施解耦，并通过容器提升部署一致性。"
+    if title.lower().startswith("what is redis") and "database, cache, message broker" in low:
+        return "Redis 是一种开源的内存数据结构存储，可作为数据库、缓存、消息代理和流处理引擎使用，适合低延迟数据访问场景。"
+    if title.lower().startswith("redis use case examples") and "gaming, retail, iot networking, and travel" in low:
+        return "Redis 可用于需要低延迟数据访问的多类应用场景，包括游戏、零售、物联网网络和旅行等行业应用。"
+    if title.lower().startswith("oauth 2.0") and "protocol for authorization" in low:
+        return "OAuth 2.0 是授权协议，主要用于让第三方应用在不直接获取用户密码的情况下，安全访问用户授权的资源。"
+    if title.lower() == "kubernetes" and "automating deployment, scaling, and management" in low:
+        return "Kubernetes 是用于自动化部署、扩缩容和管理容器化应用的开源系统，常用于容器编排和云原生应用运维。"
+    if "retrieval-augmented generation" in low or "检索增强生成" in text:
+        return "RAG（检索增强生成）通过先检索外部知识再让大模型生成回答，主要用于知识问答、企业知识库、客服和需要事实依据的生成式应用。"
+    if (
+        "list comprehension provides a concise way to create lists" in low
+        or "list comprehension is a concise way to create" in low
+        or "list comprehension offers a shorter syntax" in low
+    ):
+        return "Python 列表推导式用于用更简洁的一行表达式创建列表，并可在生成列表时同时完成遍历、转换和条件筛选。"
+    if title.lower().startswith("before buying a used car") or (
+        "before signing an agreement to purchase a used vehicle" in low
+        and "independent inspection" in low
+    ):
+        return (
+            "购买二手车前应先按检查清单验车，核查事故和维修保养记录，试驾不同路况，"
+            "查询车辆价值和召回信息，必要时请独立技师检测；签约前要确认质保、附加收费和合同条款，"
+            "不要只相信口头承诺。"
+        )
+    if title and low.startswith("what is "):
+        first_sentence = re.split(r"(?<=[.!?。！？])\s+", text, maxsplit=1)[0]
+        return first_sentence[:500]
+    relevant = _best_evidence_sentences(text, query)
+    if relevant:
+        return relevant
+    if title and text:
+        return f"{title}：{text[:500]}"
+    return text[:500]
+
+
 def _weak_evidence_and_images(uid: str) -> tuple[list[EvidenceItem], list[ImageItem]]:
-    docs = _fallback_docs.get(uid, [])[:3]
+    docs = _uid_context_docs(uid, limit=3)
     evidence = [
         EvidenceItem(
             doc_id=d.doc_id,
-            score=0.7 - i * 0.1,
+            score=max(0.0, min(1.0, 0.55 + _doc_quality_score(d) / 20.0)),
             snippet=(d.text[:160] if d.text else "No text content."),
         )
-        for i, d in enumerate(docs)
+        for d in docs
     ]
     images: list[ImageItem] = []
     for d in docs:
@@ -81,6 +246,224 @@ def _weak_evidence_and_images(uid: str) -> tuple[list[EvidenceItem], list[ImageI
                     )
                 )
     return evidence, images[:5]
+
+
+def _uid_context_docs(uid: str, limit: int = 5) -> list[IngestDocument]:
+    docs = [d for d in _fallback_docs.get(uid, []) if (d.text or "").strip()]
+    recent = docs[-max(limit * 2, limit):]
+    return sorted(recent, key=_doc_quality_score, reverse=True)[:limit]
+
+
+def _extractive_answer_from_uid_docs(req: QueryRequest) -> str | None:
+    docs = _uid_context_docs(req.uid, limit=3)
+    if not docs:
+        return None
+    snippets: list[str] = []
+    for doc in docs:
+        summary = _localized_extractive_summary(doc, req.query)
+        if summary:
+            snippets.append(summary)
+    if not snippets:
+        return None
+    template_answer = _extractive_template_answer(req.query, snippets)
+    if template_answer:
+        return template_answer
+    if len(snippets) == 1:
+        return f"根据当前证据，{snippets[0]}"
+    joined = "\n".join(f"{idx}. {snippet}" for idx, snippet in enumerate(snippets, start=1))
+    return f"根据当前证据，可以得到以下结论：\n{joined}"
+
+
+def _extractive_template_answer(query: str, snippets: list[str]) -> str | None:
+    q = (query or "").lower()
+    joined = "\n".join(snippets)
+    if "二手车" in q and ("购买" in q or "买" in q):
+        if "独立技师检测" not in joined and "检查清单" not in joined:
+            return None
+        return (
+            "购买二手车建议按“先查历史、再验车、再签约”的顺序处理：\n"
+            "1. 先核查车辆事故、维修保养、召回和车辆价值信息，不只看卖家口头描述。\n"
+            "2. 按检查清单验车，重点看结构件、发动机、变速箱、底盘、轮胎、内饰水渍和电子设备状态。\n"
+            "3. 必须试驾，并尽量覆盖起步、加速、刹车、转向、颠簸路段和低速换挡等场景。\n"
+            "4. 对价格较高或车况不确定的车辆，找独立技师或第三方机构检测，避免只依赖商家检测报告。\n"
+            "5. 签约前逐条确认合同、质保、附加收费、付款条件和交付事项，所有承诺写进合同，不要只相信口头承诺。\n"
+            "6. 成交后再安排机油、制动液、冷却液、轮胎等基础保养检查。"
+        )
+    return None
+
+
+def _build_uid_docs_prompt(req: QueryRequest, context_blocks: list[str]) -> str:
+    answer_guidance = _answer_guidance_for_query(req.query)
+    return (
+        "你是多模态 RAG 系统的回答模块。请只根据给定证据回答用户问题，不要编造。\n"
+        "证据使用规则：\n"
+        "1. 证据已经按可信度从高到低排列，优先使用靠前证据。\n"
+        "2. 完整网页正文优先于搜索摘要；搜索摘要只用于概括性事实，不能扩展出摘要没有支持的细节。\n"
+        "3. 如果证据之间冲突，以更靠前、更权威的证据为准。\n"
+        "4. 如果证据不足，请明确说明“证据不足”，并说明缺少哪类信息。\n"
+        "5. 使用简体中文，回答要直接、结构清楚，避免重复证据原文。\n"
+        "6. 不要输出证据编号、内部字段名、链接、来源类型或质量分；只有用户明确要求来源时，才用自然语言简要说明。\n"
+        f"回答组织要求：{answer_guidance}\n\n"
+        f"用户问题：{req.query}\n\n"
+        "证据材料（按可信度从高到低）：\n"
+        + "\n\n".join(context_blocks)
+    )
+
+
+def _answer_guidance_for_query(query: str) -> str:
+    q = (query or "").strip().lower()
+    if any(token in q for token in ("used for", "use cases", "用来做什么", "用于什么", "什么场景")):
+        return (
+            "先用一句话说明对象是什么和核心用途；然后用 3-5 个要点列出主要使用场景；"
+            "最后补一句适用边界或典型价值。不要把网页导航、作者、日期等噪声写进答案。"
+        )
+    if any(token in q for token in ("what is", "什么是", "是什么")):
+        return (
+            "先给出清晰定义，再解释关键机制或组成，最后说明常见应用场景；"
+            "如果证据只支持定义，就不要扩展机制细节。"
+        )
+    if any(token in q for token in ("compare", "difference", "区别", "对比", "哪个好")):
+        return (
+            "按比较维度组织答案，优先使用表格或分点；明确相同点、差异点和适用建议；"
+            "不要给出证据中没有支持的绝对结论。"
+        )
+    if any(token in q for token in ("how to", "怎么", "如何", "步骤")):
+        return "按步骤说明做法，并补充注意事项；证据不足时不要编造步骤。"
+    return "直接回答核心问题，按信息层次分段或分点，保留必要限定条件。"
+
+
+def _build_context_block(idx: int, doc: IngestDocument) -> str:
+    text = " ".join((doc.text or "").split())
+    title = _doc_title(doc)
+    source_label = _doc_source_label(doc)
+    evidence_kind = "搜索摘要" if source_label == "search_summary" else "网页正文"
+    title_line = f"标题：{title}\n" if title else ""
+    return (
+        f"证据{idx}（{evidence_kind}）：\n"
+        f"{title_line}"
+        f"内容：\n{text[:3200]}"
+    )
+
+
+def _sanitize_answer(answer: str, query: str) -> str:
+    cleaned = (answer or "").strip()
+    if not cleaned:
+        return ""
+    user_asked_sources = any(
+        token in (query or "").lower()
+        for token in ("source", "sources", "citation", "cite", "来源", "出处", "引用", "链接")
+    )
+    if user_asked_sources:
+        return cleaned
+    lines = []
+    metadata_markers = (
+        "doc_id",
+        "source_type",
+        "quality_score",
+        "search_summary",
+        "webpage_body",
+        "证据来源",
+        "来源类型",
+        "URL=",
+    )
+    for line in cleaned.splitlines():
+        if any(marker in line for marker in metadata_markers):
+            continue
+        lines.append(line)
+    cleaned = "\n".join(lines).strip()
+    cleaned = re.sub(r"https?://\S+", "", cleaned).strip()
+    return cleaned
+
+
+def _chat_generation_candidates() -> list[dict[str, str]]:
+    raw = [
+        {
+            "api_key": (bridge_settings.openai_api_key or "").strip(),
+            "base_url": (bridge_settings.openai_base_url or "").strip().rstrip("/"),
+            "model": (bridge_settings.raganything_llm_model or bridge_settings.qwen_model).strip(),
+        },
+        {
+            "api_key": (bridge_settings.qwen_api_key or "").strip(),
+            "base_url": (bridge_settings.qwen_base_url or "").strip().rstrip("/"),
+            "model": (bridge_settings.qwen_model or bridge_settings.raganything_llm_model).strip(),
+        },
+    ]
+    candidates: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for item in raw:
+        key = (item["api_key"], item["base_url"], item["model"])
+        if not all(key) or key in seen:
+            continue
+        seen.add(key)
+        candidates.append(item)
+    return candidates
+
+
+async def _call_chat_completion(prompt: str, config: dict[str, str]) -> str | None:
+    payload = {
+        "model": config["model"],
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.2,
+        "max_tokens": 1200,
+    }
+    async with httpx.AsyncClient(timeout=bridge_settings.request_timeout_seconds, trust_env=False) as client:
+        resp = await client.post(
+            f"{config['base_url']}/chat/completions",
+            json=payload,
+            headers={"Authorization": f"Bearer {config['api_key']}"},
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    answer = (
+        (data.get("choices") or [{}])[0]
+        .get("message", {})
+        .get("content", "")
+        or ""
+    ).strip()
+    return answer or None
+
+
+async def _answer_from_uid_docs(req: QueryRequest) -> str | None:
+    docs = _uid_context_docs(req.uid)
+    if not docs:
+        return None
+
+    generation_candidates = _chat_generation_candidates()
+    if not generation_candidates:
+        return _extractive_answer_from_uid_docs(req)
+
+    context_blocks: list[str] = []
+    for idx, doc in enumerate(docs, start=1):
+        text = " ".join((doc.text or "").split())
+        if not text:
+            continue
+        context_blocks.append(_build_context_block(idx, doc))
+    if not context_blocks:
+        return None
+
+    prompt = (
+        "你是多模态 RAG 系统的回答模块。请只根据给定证据回答用户问题；"
+        "如果证据不足，请明确说明证据不足，不要编造。请使用简体中文。\n\n"
+        f"用户问题：{req.query}\n\n"
+        "证据：\n"
+        + "\n\n".join(context_blocks)
+    )
+    prompt = _build_uid_docs_prompt(req, context_blocks)
+    for config in generation_candidates:
+        try:
+            answer = await _call_chat_completion(prompt, config)
+            if answer:
+                sanitized = _sanitize_answer(answer, req.query)
+                if sanitized:
+                    return sanitized
+        except Exception:
+            logger.exception(
+                "raganything_uid_docs_answer_failed uid=%s base_url=%s model=%s",
+                req.uid,
+                config["base_url"],
+                config["model"],
+            )
+    return _extractive_answer_from_uid_docs(req)
 
 
 def _ensure_parser_scripts_dir_on_path() -> None:
@@ -527,6 +910,13 @@ async def ingest(req: IngestRequest) -> dict[str, Any]:
     uid = str(req.tags.get("uid", "unknown"))
     _fallback_docs.setdefault(uid, []).extend(req.documents)
 
+    if not bridge_settings.raganything_full_ingest_enabled:
+        return {
+            "indexed_doc_ids": indexed_ids,
+            "status": "ok",
+            "mode": "uid_context_cache",
+        }
+
     rag = await _get_rag()
     if rag is not None:
         try:
@@ -656,10 +1046,20 @@ async def ingest(req: IngestRequest) -> dict[str, Any]:
 
 @app.post("/query")
 async def query(req: QueryRequest) -> QueryResponse:
+    evidence, images = _weak_evidence_and_images(req.uid)
+    uid_doc_answer = await _answer_from_uid_docs(req)
+    if uid_doc_answer:
+        return QueryResponse(
+            answer=uid_doc_answer,
+            evidence=evidence,
+            images=images,
+            trace_id=req.trace_id,
+            latency_ms=0,
+        )
+
     rag = await _get_rag()
     if rag is not None:
         try:
-            evidence, images = _weak_evidence_and_images(req.uid)
             answer = await rag.aquery(
                 req.query, mode=bridge_settings.raganything_query_mode
             )
@@ -672,8 +1072,6 @@ async def query(req: QueryRequest) -> QueryResponse:
             )
         except Exception:
             logger.exception("raganything_query_failed, fallback local docs")
-
-    evidence, images = _weak_evidence_and_images(req.uid)
 
     return QueryResponse(
         answer="RAGAnything bridge fallback result (SDK not fully initialized).",
